@@ -1,7 +1,6 @@
 import Foundation
 import AppKit
 @preconcurrency import UserNotifications
-import AVFoundation
 
 enum Phase: String, CaseIterable, Identifiable {
     case focus = "Focus"
@@ -40,7 +39,6 @@ final class TimerModel {
         didSet { if phase == .longBreak, !isRunning { resetToCurrentPhase() } }
     }
     var longBreakInterval: Int = 4
-    var soundEnabled = true
     var notificationEnabled = true
 
     // MARK: - Menu bar title
@@ -55,8 +53,18 @@ final class TimerModel {
         return 1.0 - (timeRemaining / totalTime)
     }
 
+    var sessionLabel: String {
+        switch phase {
+        case .focus:
+            return "Focus \(completedPomodoros + 1)"
+        case .shortBreak:
+            return "Break \(completedPomodoros)"
+        case .longBreak:
+            return "Long Break \(completedPomodoros)"
+        }
+    }
+
     private var timerTask: Task<Void, Never>?
-    private var audioPlayer: AVAudioPlayer?
 
     // MARK: - Init
     init() {
@@ -121,7 +129,6 @@ final class TimerModel {
 
     private func completePhase() {
         pause()
-        playSound()
         sendNotification()
         advancePhase()
     }
@@ -140,23 +147,26 @@ final class TimerModel {
         }
     }
 
-    // MARK: - Sound
-    private func playSound() {
-        guard soundEnabled else { return }
-        if let url = Bundle.main.url(forResource: "chime", withExtension: "wav") {
-            audioPlayer = try? AVAudioPlayer(contentsOf: url)
-            audioPlayer?.play()
-        } else {
-            NSSound.beep()
-        }
-    }
-
     // MARK: - Notifications
     private func sendNotification() {
         guard notificationEnabled else { return }
         let center = UNUserNotificationCenter.current()
-        center.requestAuthorization(options: [.alert, .sound]) { [phase = self.phase] granted, _ in
-            guard granted else { return }
+        
+        let startAction = UNNotificationAction(
+            identifier: "START_ACTION",
+            title: "Start",
+            options: .foreground
+        )
+        let category = UNNotificationCategory(
+            identifier: "PHASE_COMPLETE",
+            actions: [startAction],
+            intentIdentifiers: [],
+            options: []
+        )
+        center.setNotificationCategories([category])
+        
+        center.getNotificationSettings { [phase = self.phase] settings in
+            guard settings.authorizationStatus == .authorized else { return }
             let content = UNMutableNotificationContent()
             switch phase {
             case .focus:
@@ -170,13 +180,19 @@ final class TimerModel {
                 content.body = "Let's get back to work!"
             }
             content.sound = .default
+            content.categoryIdentifier = "PHASE_COMPLETE"
+            content.interruptionLevel = .timeSensitive
             let request = UNNotificationRequest(
                 identifier: UUID().uuidString,
                 content: content,
                 trigger: nil
             )
-            UNUserNotificationCenter.current().add(request)
+            center.add(request)
         }
+    }
+    
+    func handleNotificationAction() {
+        start()
     }
 }
 
