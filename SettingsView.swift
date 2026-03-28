@@ -118,7 +118,7 @@ struct SettingsContent: View {
                             NSWorkspace.shared.open(url)
                         }
                     } else if notificationStatus == .notDetermined {
-                        requestNotificationPermissionWithTest()
+                        requestNotificationPermission()
                     }
                 } label: {
                     HStack(spacing: 6) {
@@ -137,25 +137,13 @@ struct SettingsContent: View {
         }
     }
 
-    private func requestNotificationPermissionWithTest() {
+    private func requestNotificationPermission() {
         guard notificationStatus == .notDetermined else { return }
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
             DispatchQueue.main.async {
                 notificationStatus = granted ? .authorized : .denied
-                if granted {
-                    sendTestNotification()
-                }
             }
         }
-    }
-
-    private func sendTestNotification() {
-        let content = UNMutableNotificationContent()
-        content.title = "Test Notification"
-        content.body = "Notifications are working!"
-        content.sound = .default
-        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
-        UNUserNotificationCenter.current().add(request) { _ in }
     }
 
     private func checkNotificationPermission() {
