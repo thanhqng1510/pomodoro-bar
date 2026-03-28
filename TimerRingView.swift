@@ -27,6 +27,7 @@ struct TimerRingView: View {
                     .font(.system(size: 36, weight: .ultraLight, design: .monospaced))
                     .monospacedDigit()
                     .contentTransition(.numericText())
+                    .animation(.easeInOut(duration: 0.25), value: timeText)
 
                 Text(phase.rawValue)
                     .font(.system(size: 10, weight: .medium, design: .rounded))

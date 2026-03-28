@@ -20,8 +20,6 @@ struct MenuBarLabel: View {
     var body: some View {
         if model.isRunning || model.timeRemaining != model.totalTime {
             Text(model.menuBarTitle)
-                .contentTransition(.numericText())
-                .animation(.easeInOut(duration: 0.25), value: model.menuBarTitle)
         } else {
             Image(systemName: "circle.dotted")
         }
