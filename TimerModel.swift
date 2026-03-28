@@ -155,7 +155,7 @@ final class TimerModel {
     private func sendNotification() {
         guard notificationEnabled else { return }
         let center = UNUserNotificationCenter.current()
-        center.requestAuthorization(options: [.alert, .sound]) { [phase = self.phase, completedPomodoros = self.completedPomodoros] granted, _ in
+        center.requestAuthorization(options: [.alert, .sound]) { [phase = self.phase] granted, _ in
             guard granted else { return }
             let content = UNMutableNotificationContent()
             switch phase {
@@ -179,3 +179,4 @@ final class TimerModel {
         }
     }
 }
+
