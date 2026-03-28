@@ -47,7 +47,6 @@
 				28ABF100C55E441FBEC3709A /* SettingsView.swift */,
 				EAB06DF5D8DF46909614063A /* Assets.xcassets */,
 			);
-			path = PomodoroBar;
 			sourceTree = "<group>";
 		};
 		C648389678E24DB0B56D45A4 /* Products */ = {
