@@ -1,0 +1,29 @@
+# Build outputs
+build/
+DerivedData/
+*.app
+
+# Xcode
+.DS_Store
+*.xcuserstate
+*.xcuserdatad
+xcuserdata/
+*.xccheckout
+*.xcscmblueprint
+
+# Swift Package Manager
+.swiftpm/
+Package.resolved
+
+# CocoaPods
+Pods/
+Podfile.lock
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*~
+
+# Misc
+*.log
