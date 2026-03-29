@@ -11,7 +11,6 @@
 		523687457F27425C8ED0B913 /* TimerModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9F9C6E007D441DC968DFBF3 /* TimerModel.swift */; };
 		03E85015DC8E4FCAB293C419 /* MenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18D9B52BA8C64BFFA8720943 /* MenuBarView.swift */; };
 		C31F316D6CE44D3E939CECC0 /* TimerRingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7214B1E919A46D892C05CF3 /* TimerRingView.swift */; };
-		06C4B3471D454385AE1F6C22 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28ABF100C55E441FBEC3709A /* SettingsView.swift */; };
 		903B740F68634C5ABC7422B8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EAB06DF5D8DF46909614063A /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
@@ -20,7 +19,6 @@
 		F9F9C6E007D441DC968DFBF3 /* TimerModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerModel.swift; sourceTree = "<group>"; };
 		18D9B52BA8C64BFFA8720943 /* MenuBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarView.swift; sourceTree = "<group>"; };
 		C7214B1E919A46D892C05CF3 /* TimerRingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerRingView.swift; sourceTree = "<group>"; };
-		28ABF100C55E441FBEC3709A /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		EAB06DF5D8DF46909614063A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		25445F5A36CF415F99D21E60 /* PomodoroBar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PomodoroBar.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -44,7 +42,6 @@
 				F9F9C6E007D441DC968DFBF3 /* TimerModel.swift */,
 				18D9B52BA8C64BFFA8720943 /* MenuBarView.swift */,
 				C7214B1E919A46D892C05CF3 /* TimerRingView.swift */,
-				28ABF100C55E441FBEC3709A /* SettingsView.swift */,
 				EAB06DF5D8DF46909614063A /* Assets.xcassets */,
 			);
 			sourceTree = "<group>";
@@ -130,7 +127,6 @@
 				523687457F27425C8ED0B913 /* TimerModel.swift in Sources */,
 				03E85015DC8E4FCAB293C419 /* MenuBarView.swift in Sources */,
 				C31F316D6CE44D3E939CECC0 /* TimerRingView.swift in Sources */,
-				06C4B3471D454385AE1F6C22 /* SettingsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
