@@ -13,8 +13,8 @@ A minimal macOS menu bar Pomodoro timer built with SwiftUI.
 
 ## Requirements
 
-- macOS 14.0+
-- Xcode 15.0+
+- macOS 26.0+ (Liquid Glass)
+- Xcode 16.0+
 
 ## Build & Install
 
@@ -45,8 +45,8 @@ open /Applications/PomodoroBar.app
 PomodoroBarApp.swift   - App entry point, notification delegate
 TimerModel.swift       - Timer logic, state management, notifications
 TimerRingView.swift    - Animated circular progress ring
-MenuBarView.swift      - Main UI with controls
-SettingsView.swift     - Settings configuration panel
+MenuBarView.swift      - Main UI with controls and settings
+Assets.xcassets/       - App icons, accent colors, phase colors
 ```
 
 ## License
