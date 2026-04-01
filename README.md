@@ -11,6 +11,11 @@ A minimal macOS menu bar Pomodoro timer built with SwiftUI.
 - **Notifications** - macOS notifications when phases complete
 - **Quick controls** - Start, pause, reset, and skip from the menu bar
 
+## Screenshots
+
+![Timer view](timer-view.png)
+![Settings view](settings-view.png)
+
 ## Requirements
 
 - macOS 26.0+ (Liquid Glass)
