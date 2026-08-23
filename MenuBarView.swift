@@ -3,270 +3,341 @@ import UserNotifications
 import AppKit
 
 struct MenuBarView: View {
-    var model: TimerModel
-    @State private var showSettings = false
-    @State private var notificationEnabled: Bool
-    @State private var notificationStatus: UNAuthorizationStatus = .notDetermined
-    @Namespace private var glassNamespace
+  @Bindable var model: TimerModel
+  @State private var showSettings = false
+  @State private var notificationStatus: UNAuthorizationStatus = .notDetermined
+  @Namespace private var glassNamespace
 
-    init(model: TimerModel) {
-        self.model = model
-        _notificationEnabled = State(initialValue: model.notificationEnabled)
+  var body: some View {
+    VStack(spacing: 0) {
+      GlassEffectContainer(spacing: 12) {
+        header
+      }
+      contentView
     }
-
-    var body: some View {
-        VStack(spacing: 0) {
-            GlassEffectContainer(spacing: 12) {
-                header
-            }
-            contentView
-        }
-        .frame(width: 260, height: 280)
-        .onAppear {
-            checkNotificationPermission()
-        }
+    .frame(width: 260)
+    .onAppear {
+      checkNotificationPermission()
     }
+  }
 
-    // MARK: - Header
-    private var header: some View {
-        HStack {
-            headerButton
-            Spacer()
-            exitButton
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
+  // MARK: - Header
+  private var header: some View {
+    HStack {
+      headerButton
+      Spacer()
+      exitButton
     }
+    .padding(.horizontal, 16)
+    .padding(.vertical, 12)
+  }
 
-    @ViewBuilder
-    private var headerButton: some View {
-        Button {
-            withAnimation(.bouncy) {
-                showSettings.toggle()
-            }
-        } label: {
-            Image(systemName: showSettings ? "chevron.left" : "slider.horizontal.3")
-                .font(.system(size: 14))
-                .frame(width: 32, height: 32)
-        }
-        .buttonStyle(.borderless)
-        .glassEffect(.regular.interactive(), in: Circle())
-        .glassEffectID("left", in: glassNamespace)
+  @ViewBuilder
+  private var headerButton: some View {
+    Button {
+      withAnimation(.bouncy) {
+        showSettings.toggle()
+      }
+    } label: {
+      Image(systemName: showSettings ? "chevron.left" : "slider.horizontal.3")
+        .font(.system(size: 14))
+        .frame(width: 32, height: 32)
+        .contentShape(Circle())
     }
+    .buttonStyle(.borderless)
+    .glassEffect(.regular.interactive(), in: Circle())
+    .glassEffectID("left", in: glassNamespace)
+    .accessibilityLabel(showSettings ? "Back to timer" : "Settings")
+    .help(showSettings ? "Back to timer" : "Settings")
+  }
 
-    @ViewBuilder
-    private var exitButton: some View {
-        if !showSettings {
-            Button { NSApp.terminate(nil) } label: {
-                Image(systemName: "power")
-                    .font(.system(size: 14))
-                    .frame(width: 32, height: 32)
-            }
-            .buttonStyle(.borderless)
-            .glassEffect(.regular.interactive(), in: Circle())
-            .glassEffectID("exit", in: glassNamespace)
-        }
+  @ViewBuilder
+  private var exitButton: some View {
+    if !showSettings {
+      Button { NSApp.terminate(nil) } label: {
+        Image(systemName: "power")
+          .font(.system(size: 14))
+          .frame(width: 32, height: 32)
+          .contentShape(Circle())
+      }
+      .buttonStyle(.borderless)
+      .glassEffect(.regular.interactive(), in: Circle())
+      .glassEffectID("exit", in: glassNamespace)
+      .accessibilityLabel("Quit Pomodoro Bar")
+      .help("Quit Pomodoro Bar")
     }
+  }
 
-    // MARK: - Content
-    @ViewBuilder
-    private var contentView: some View {
-        Group {
-            if showSettings {
-                settingsContent
-            } else {
-                mainContent
-            }
-        }
-        .frame(height: 224)
+  // MARK: - Content
+  @ViewBuilder
+  private var contentView: some View {
+    ZStack {
+      if showSettings {
+        settingsContent
+          .transition(.opacity)
+      } else {
+        mainContent
+          .transition(.opacity)
+      }
     }
+  }
 
-    @ViewBuilder
-    private var mainContent: some View {
-        VStack(spacing: 10) {
-            TimerRingView(
-                progress: model.progress,
-                phase: model.phase,
-                sessionLabel: model.sessionLabel,
-                timeText: model.menuBarTitle
-            )
-            controlButtons
-        }
-        .padding(.horizontal, 16)
-        .padding(.bottom, 12)
+  private var mainContent: some View {
+    VStack(spacing: 12) {
+      TimerRingView(
+        progress: model.progress,
+        phase: model.phase,
+        sessionLabel: model.sessionLabel,
+        timeText: model.menuBarTitle,
+        isPaused: model.isPaused
+      )
+      CycleDotsView(
+        completed: model.completedInCycle,
+        total: model.longBreakInterval,
+        color: model.phase.color
+      )
+      controlButtons
     }
+    .padding(.horizontal, 16)
+    .padding(.top, 2)
+    .padding(.bottom, 14)
+  }
 
-    @ViewBuilder
-    private var settingsContent: some View {
-        VStack(spacing: 8) {
-            durationsSection
-            toggleSection
-            permissionButton
-        }
-        .padding(.horizontal, 16)
-        .padding(.bottom, 12)
+  private var settingsContent: some View {
+    VStack(spacing: 10) {
+      durationsSection
+      toggleSection
+      permissionButton
     }
+    .padding(.horizontal, 16)
+    .padding(.top, 2)
+    .padding(.bottom, 14)
+  }
 
-    // MARK: - Control Buttons
-    private var controlButtons: some View {
-        HStack(spacing: 0) {
-            controlButton(icon: "arrow.counterclockwise", action: model.reset)
-            controlButton(icon: model.isRunning ? "pause.fill" : "play.fill", action: model.toggle, isPrimary: true)
-            controlButton(icon: "forward.end.fill", action: model.skip)
-        }
-        .glassEffect(.regular.interactive(), in: Capsule())
+  // MARK: - Control Buttons
+  private var controlButtons: some View {
+    HStack(spacing: 0) {
+      controlButton(icon: "arrow.counterclockwise", label: "Reset session", action: model.reset)
+      controlButton(
+        icon: model.isRunning ? "pause.fill" : "play.fill",
+        label: model.isRunning ? "Pause" : "Start",
+        action: model.toggle,
+        isPrimary: true,
+        shortcut: .space
+      )
+      controlButton(icon: "forward.end.fill", label: "Skip to next phase", action: model.skip)
     }
+    .glassEffect(.regular.interactive(), in: Capsule())
+  }
 
-    private func controlButton(icon: String, action: @escaping () -> Void, isPrimary: Bool = false) -> some View {
-        Button(action: action) {
-            Image(systemName: icon)
-                .font(.system(size: isPrimary ? 18 : 14))
-                .frame(width: isPrimary ? 56 : 48, height: 40)
-                .contentShape(Rectangle())
-        }
-        .buttonStyle(.borderless)
+  private func controlButton(
+    icon: String,
+    label: String,
+    action: @escaping () -> Void,
+    isPrimary: Bool = false,
+    shortcut: KeyEquivalent? = nil
+  ) -> some View {
+    Button(action: action) {
+      Image(systemName: icon)
+        .font(.system(size: isPrimary ? 18 : 14))
+        .frame(width: isPrimary ? 56 : 48, height: 40)
+        .contentShape(Rectangle())
     }
+    .buttonStyle(.borderless)
+    .modifier(KeyboardShortcutModifier(shortcut: shortcut))
+    .accessibilityLabel(label)
+    .help(label)
+  }
 
-    // MARK: - Settings
-    private var durationsSection: some View {
-        VStack(spacing: 8) {
-            durationRow(label: "Focus", icon: "circle.inset.filled", value: .focus)
-            durationRow(label: "Short Break", icon: "cup.and.saucer", value: .shortBreak)
-            durationRow(label: "Long Break", icon: "moon", value: .longBreak)
-            durationRow(label: "Long Break After", icon: "arrow.turn.down.right", value: .interval)
-        }
-        .padding(.vertical, 4)
-        .padding(.horizontal, 12)
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 16))
+  // MARK: - Settings
+  private var durationsSection: some View {
+    VStack(spacing: 4) {
+      SettingNumberField(
+        label: "Focus", icon: "circle.inset.filled",
+        value: $model.focusDuration, range: 1...120, unit: "min"
+      )
+      SettingNumberField(
+        label: "Short Break", icon: "cup.and.saucer",
+        value: $model.shortBreakDuration, range: 1...60, unit: "min"
+      )
+      SettingNumberField(
+        label: "Long Break", icon: "moon",
+        value: $model.longBreakDuration, range: 1...60, unit: "min"
+      )
+      SettingNumberField(
+        label: "Long Break After", icon: "arrow.turn.down.right",
+        value: $model.longBreakInterval, range: 1...10, unit: "×"
+      )
     }
+    .padding(.vertical, 6)
+    .padding(.horizontal, 12)
+    .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 16))
+  }
 
-    private func durationRow(label: String, icon: String, value: DurationValue) -> some View {
-        HStack(spacing: 10) {
-            Image(systemName: icon)
-                .font(.system(size: 10))
-                .foregroundStyle(.secondary)
-                .frame(width: 14)
+  private var toggleSection: some View {
+    HStack(spacing: 10) {
+      Image(systemName: "bell")
+        .font(.system(size: 10))
+        .foregroundStyle(.secondary)
+        .frame(width: 14)
 
-            Text(label)
-                .font(.system(size: 12))
-                .frame(maxWidth: .infinity, alignment: .leading)
+      Text("Notifications")
+        .font(.system(size: 12))
+        .frame(maxWidth: .infinity, alignment: .leading)
 
-            TextField("", text: binding(for: value))
-                .font(.system(size: 13, weight: .medium, design: .monospaced))
-                .multilineTextAlignment(.trailing)
-                .frame(width: 36)
-                .textFieldStyle(.plain)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 6)
-                .contentShape(RoundedRectangle(cornerRadius: 8))
-        }
-    }
-
-    private var toggleSection: some View {
-        HStack(spacing: 10) {
-            Image(systemName: "bell")
-                .font(.system(size: 10))
-                .foregroundStyle(.secondary)
-                .frame(width: 14)
-
-            Text("Notification")
-                .font(.system(size: 12))
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-            Toggle("", isOn: $notificationEnabled)
-                .labelsHidden()
-                .toggleStyle(.switch)
-                .controlSize(.small)
-                .onChange(of: notificationEnabled) { _, newValue in
-                    model.notificationEnabled = newValue
-                }
-        }
-        .padding(.vertical, 4)
-        .padding(.horizontal, 12)
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 16))
-    }
-
-    @ViewBuilder
-    private var permissionButton: some View {
-        if notificationEnabled && (notificationStatus == .notDetermined || notificationStatus == .denied) {
-            Button {
-                handlePermissionTap()
-            } label: {
-                HStack(spacing: 6) {
-                    Image(systemName: notificationStatus == .denied ? "gear" : "bell.badge")
-                        .font(.system(size: 10))
-                    Text(notificationStatus == .denied ? "Open Settings" : "Enable Notifications")
-                        .font(.system(size: 11, weight: .medium))
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 10)
-                .contentShape(Capsule())
-            }
-            .buttonStyle(.borderless)
-            .glassEffect(.regular.interactive(), in: Capsule())
-            .foregroundStyle(.primary)
-        }
-    }
-
-    // MARK: - Helpers
-    private enum DurationValue {
-        case focus, shortBreak, longBreak, interval
-    }
-
-    private func binding(for value: DurationValue) -> Binding<String> {
-        switch value {
-        case .focus:
-            Binding(
-                get: { String(model.focusDuration) },
-                set: { if let v = Int($0), v > 0 { model.focusDuration = min(v, 120) } }
-            )
-        case .shortBreak:
-            Binding(
-                get: { String(model.shortBreakDuration) },
-                set: { if let v = Int($0), v > 0 { model.shortBreakDuration = min(v, 60) } }
-            )
-        case .longBreak:
-            Binding(
-                get: { String(model.longBreakDuration) },
-                set: { if let v = Int($0), v > 0 { model.longBreakDuration = min(v, 60) } }
-            )
-        case .interval:
-            Binding(
-                get: { String(model.longBreakInterval) },
-                set: { if let v = Int($0), v > 0 { model.longBreakInterval = min(v, 10) } }
-            )
-        }
-    }
-
-    private func handlePermissionTap() {
-        if notificationStatus == .denied {
-            if let url = URL(string: "x-apple.systempreferences:com.apple.preference.notifications") {
-                NSWorkspace.shared.open(url)
-            }
-        } else {
+      Toggle("Notifications", isOn: $model.notificationEnabled)
+        .labelsHidden()
+        .toggleStyle(.switch)
+        .controlSize(.small)
+        .onChange(of: model.notificationEnabled) { _, isOn in
+          if isOn, notificationStatus == .notDetermined {
             requestNotificationPermission()
+          }
         }
     }
+    .padding(.vertical, 6)
+    .padding(.horizontal, 12)
+    .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 16))
+  }
 
-    private func requestNotificationPermission() {
-        guard notificationStatus == .notDetermined else { return }
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
-            DispatchQueue.main.async {
-                notificationStatus = granted ? .authorized : .denied
-            }
+  @ViewBuilder
+  private var permissionButton: some View {
+    if model.notificationEnabled, notificationStatus == .notDetermined || notificationStatus == .denied {
+      Button {
+        handlePermissionTap()
+      } label: {
+        HStack(spacing: 6) {
+          Image(systemName: notificationStatus == .denied ? "gear" : "bell.badge")
+            .font(.system(size: 10))
+          Text(notificationStatus == .denied ? "Open Settings" : "Enable Notifications")
+            .font(.system(size: 11, weight: .medium))
         }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 10)
+        .contentShape(Capsule())
+      }
+      .buttonStyle(.borderless)
+      .glassEffect(.regular.interactive(), in: Capsule())
+      .foregroundStyle(.primary)
+      .accessibilityLabel(
+        notificationStatus == .denied ? "Open notification settings" : "Enable notifications"
+      )
     }
+  }
 
-    private func checkNotificationPermission() {
-        UNUserNotificationCenter.current().getNotificationSettings { settings in
-            let status = settings.authorizationStatus
-            DispatchQueue.main.async {
-                notificationStatus = status
-            }
-        }
+  // MARK: - Helpers
+  private func handlePermissionTap() {
+    if notificationStatus == .denied {
+      openNotificationSettings()
+    } else {
+      requestNotificationPermission()
     }
+  }
+
+  private func openNotificationSettings() {
+    if let url = URL(string: "x-apple.systempreferences:com.apple.Notifications-Settings.extension") {
+      NSWorkspace.shared.open(url)
+    }
+  }
+
+  private func requestNotificationPermission() {
+    guard notificationStatus == .notDetermined else { return }
+    UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
+      DispatchQueue.main.async {
+        notificationStatus = granted ? .authorized : .denied
+      }
+    }
+  }
+
+  private func checkNotificationPermission() {
+    UNUserNotificationCenter.current().getNotificationSettings { settings in
+      let status = settings.authorizationStatus
+      DispatchQueue.main.async {
+        notificationStatus = status
+      }
+    }
+  }
+}
+
+// MARK: - Number Field
+
+/// Numeric settings field that tolerates transient input: filters to digits,
+/// updates the binding live while values are in range, and clamps on commit.
+private struct SettingNumberField: View {
+  let label: String
+  let icon: String
+  @Binding var value: Int
+  let range: ClosedRange<Int>
+  let unit: String
+
+  @State private var text = ""
+  @FocusState private var isFocused: Bool
+
+  var body: some View {
+    HStack(spacing: 10) {
+      Image(systemName: icon)
+        .font(.system(size: 10))
+        .foregroundStyle(.secondary)
+        .frame(width: 14)
+
+      Text(label)
+        .font(.system(size: 12))
+        .frame(maxWidth: .infinity, alignment: .leading)
+
+      TextField("", text: $text)
+        .font(.system(size: 13, weight: .medium, design: .monospaced))
+        .multilineTextAlignment(.trailing)
+        .frame(width: 34)
+        .textFieldStyle(.plain)
+        .focused($isFocused)
+        .onSubmit(commit)
+        .onChange(of: isFocused) { _, focused in
+          if !focused { commit() }
+        }
+        .onChange(of: text) { _, newValue in
+          let filtered = String(newValue.filter(\.isNumber).prefix(3))
+          if filtered != newValue { text = filtered }
+          if let parsed = Int(filtered), range.contains(parsed) {
+            value = parsed
+          }
+        }
+        .onChange(of: value) { _, newValue in
+          if !isFocused { text = String(newValue) }
+        }
+        .accessibilityLabel(label)
+
+      Text(unit)
+        .font(.system(size: 11))
+        .foregroundStyle(.secondary)
+        .frame(width: 22, alignment: .leading)
+    }
+    .padding(.vertical, 3)
+    .onAppear {
+      text = String(value)
+    }
+  }
+
+  private func commit() {
+    if let parsed = Int(text) {
+      value = min(max(parsed, range.lowerBound), range.upperBound)
+    }
+    text = String(value)
+  }
+}
+
+/// Applies an optional keyboard shortcut, so buttons without one stay unmodified.
+private struct KeyboardShortcutModifier: ViewModifier {
+  let shortcut: KeyEquivalent?
+
+  func body(content: Content) -> some View {
+    if let shortcut {
+      content.keyboardShortcut(shortcut, modifiers: [])
+    } else {
+      content
+    }
+  }
 }
 
 #Preview {
-    MenuBarView(model: TimerModel())
+  MenuBarView(model: TimerModel())
 }

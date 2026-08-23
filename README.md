@@ -10,6 +10,8 @@ A minimal macOS menu bar Pomodoro timer built with SwiftUI.
 - **Customizable durations** - Configure focus, short break, and long break times
 - **Notifications** - macOS notifications when phases complete
 - **Quick controls** - Start, pause, reset, and skip from the menu bar
+- **Persistent settings** - Durations and preferences are saved between launches
+- **Cycle tracking** - Dots show your progress toward the long break
 
 ## Screenshots
 
@@ -19,7 +21,7 @@ A minimal macOS menu bar Pomodoro timer built with SwiftUI.
 ## Requirements
 
 - macOS 26.0+ (Liquid Glass)
-- Xcode 16.0+
+- Xcode 26.0+
 
 ## Build & Install
 
