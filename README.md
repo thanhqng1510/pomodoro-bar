@@ -21,7 +21,32 @@ A minimal macOS menu bar Pomodoro timer built with SwiftUI.
 ## Requirements
 
 - macOS 26.0+ (Liquid Glass)
-- Xcode 26.0+
+- Xcode 26.0+ (to build from source)
+
+## Install
+
+The easiest way to install is with a single command from a terminal (macOS 26,
+Apple Silicon):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/thanhqng1510/pomodoro-bar/main/install.sh | bash
+```
+
+This downloads the latest release, verifies its checksum, and installs it to
+`/Applications`. Launch it with:
+
+```bash
+open -a PomodoroBar
+```
+
+To uninstall:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/thanhqng1510/pomodoro-bar/main/uninstall.sh | bash
+```
+
+> Currently only **Apple Silicon (arm64)** builds are published. Intel Macs
+> aren't supported yet.
 
 ## Build & Install
 
@@ -58,9 +83,10 @@ app binary and auto-generated release notes attached.
    it can't be confused with a branch of the same name.
 
 3. The workflow runs in **Actions**: a build job compiles the app and uploads
-   it, then a release job creates a **draft** release on the
-   [Releases](https://github.com/thanhqng1510/pomodoro-bar/releases) page.
-4. Open the draft release, review/edit the notes, and click **Publish release**.
+   it, then a release job creates and **publishes** the release on the
+   [Releases](https://github.com/thanhqng1510/pomodoro-bar/releases) page
+   with auto-generated notes. Because releases publish automatically, review
+   the tag and changelog **before** pushing it.
 
 Each release automatically includes the **source code** (a zip/tar.gz archive)
 and the built `PomodoroBar-v<ver>.zip` plus a `checksums.txt` file. Because the
@@ -83,6 +109,8 @@ PomodoroBarApp.swift   - App entry point, notification delegate
 TimerModel.swift       - Timer logic, state management, notifications
 TimerRingView.swift    - Animated circular progress ring
 MenuBarView.swift      - Main UI with controls and settings
+install.sh             - curl-based CLI installer
+uninstall.sh           - CLI uninstaller
 Assets.xcassets/       - App icons, accent colors, phase colors
 ```
 

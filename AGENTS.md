@@ -9,9 +9,17 @@ PomodoroBarApp.swift   # App entry, notification delegate
 TimerModel.swift       # Business logic, state, notifications, UserDefaults persistence
 TimerRingView.swift    # Animated progress ring, cycle dots
 MenuBarView.swift      # Main UI, controls, settings
+install.sh             # curl-based CLI installer (reuses release zip + checksums)
+uninstall.sh           # CLI uninstaller
 Assets.xcassets/       # Icons, phase colors, AccentColor
 .github/workflows/     # CI: auto-build + release on tag push
 ```
+
+## Distribution (install.sh)
+- Users install via `curl -fsSL https://raw.githubusercontent.com/thanhqng1510/pomodoro-bar/main/install.sh | bash`
+- Resolves latest version from the GitHub `releases/latest` API, falls back to `FALLBACK_VERSION`; arm64 only
+- Downloads `PomodoroBar-<ver>.zip` + `checksums.txt` from the release, verifies SHA-256, installs to `/Applications`, ad-hoc signs
+- Release uses `softprops/action-gh-release` with `draft: false` so the API + public download URLs work for the installer
 
 ## Build & Install
 ```bash
