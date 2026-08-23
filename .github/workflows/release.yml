@@ -66,4 +66,3 @@ jobs:
         with:
           files: dist/* # zip + checksums.txt
           generate_release_notes: true # auto notes from commits/PRs
-          draft: true # review on the Releases page, then Publish

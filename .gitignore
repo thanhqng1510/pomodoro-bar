@@ -27,3 +27,4 @@ Podfile.lock
 
 # Misc
 *.log
+.zcode/
