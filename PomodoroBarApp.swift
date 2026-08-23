@@ -4,11 +4,11 @@ import AppKit
 
 class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
     var model: TimerModel?
-    
+
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification) async -> UNNotificationPresentationOptions {
-        return [.banner, .sound]
+        return [.banner, .sound, .list]
     }
-    
+
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
         let actionIdentifier = response.actionIdentifier
         if actionIdentifier == "START_ACTION" {
@@ -56,6 +56,7 @@ struct MenuBarLabel: View {
                 Image(systemName: model.phase.icon)
                     .padding(.trailing, 4)
                 Text(model.menuBarTitle)
+                    .monospacedDigit()
             }
         } else {
             Image(systemName: "circle.dotted")
