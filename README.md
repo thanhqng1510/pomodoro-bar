@@ -51,8 +51,11 @@ app binary and auto-generated release notes attached.
 
    ```bash
    git tag v1.2.0
-   git push origin v1.2.0
+   git push origin refs/tags/v1.2.0
    ```
+
+   The `refs/tags/` prefix makes it explicit that you're pushing the tag, so
+   it can't be confused with a branch of the same name.
 
 3. The workflow runs in **Actions**: a build job compiles the app and uploads
    it, then a release job creates a **draft** release on the
