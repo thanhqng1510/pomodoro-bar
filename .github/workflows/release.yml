@@ -1,6 +1,6 @@
 name: Publish Release
 
-# Triggered by pushing a tag like `v1.2.0`. Builds the macOS app on a macOS 26
+# Triggered by pushing a tag like `v0.0.1`. Builds the macOS app on a macOS 26
 # runner, then a separate job creates the GitHub Release and attaches the binary.
 on:
   push:
@@ -19,7 +19,7 @@ jobs:
 
       - name: Resolve version from tag
         run: |
-          # v1.1.0 -> 1.1.0
+          # v0.0.1 -> 0.0.1
           VERSION=${GITHUB_REF_NAME#v}
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
 

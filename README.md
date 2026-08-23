@@ -50,8 +50,8 @@ app binary and auto-generated release notes attached.
    version:
 
    ```bash
-   git tag v1.2.0
-   git push origin refs/tags/v1.2.0
+   git tag v0.0.1
+   git push origin refs/tags/v0.0.1
    ```
 
    The `refs/tags/` prefix makes it explicit that you're pushing the tag, so
