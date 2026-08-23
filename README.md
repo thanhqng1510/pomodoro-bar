@@ -37,6 +37,33 @@ Then open from Applications or run:
 open /Applications/PomodoroBar.app
 ```
 
+## Publishing a Release
+
+Releases are automated with GitHub Actions. Pushing a version tag builds the
+app on a GitHub-hosted macOS runner, then creates a GitHub Release with the
+app binary and auto-generated release notes attached.
+
+1. Bump the version in the Xcode project: select the `PomodoroBar` target →
+   **General** → update **Version** (and the marketing version in the project file
+   if needed).
+2. Commit and push your changes, then create and push a tag matching the
+   version:
+
+   ```bash
+   git tag v1.2.0
+   git push origin v1.2.0
+   ```
+
+3. The workflow runs in **Actions**: a build job compiles the app and uploads
+   it, then a release job creates a **draft** release on the
+   [Releases](https://github.com/thanhqng1510/pomodoro-bar/releases) page.
+4. Open the draft release, review/edit the notes, and click **Publish release**.
+
+Each release automatically includes the **source code** (a zip/tar.gz archive)
+and the built `PomodoroBar-v<ver>.zip` plus a `checksums.txt` file. Because the
+app is not notarized, first-time users on macOS will see an "unidentified
+developer" warning and must right-click → **Open** to launch it.
+
 ## Default Settings
 
 | Setting | Duration |

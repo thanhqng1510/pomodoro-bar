@@ -10,6 +10,7 @@ TimerModel.swift       # Business logic, state, notifications, UserDefaults pers
 TimerRingView.swift    # Animated progress ring, cycle dots
 MenuBarView.swift      # Main UI, controls, settings
 Assets.xcassets/       # Icons, phase colors, AccentColor
+.github/workflows/     # CI: auto-build + release on tag push
 ```
 
 ## Build & Install
@@ -40,6 +41,13 @@ xcodebuild -scheme PomodoroBar -configuration Debug build CODE_SIGNING_ALLOWED=N
 ## Settings Persistence
 - Durations, long-break interval, notification toggle, and completed pomodoros persist via `UserDefaults` (see `TimerModel.Keys`)
 - Deadline-based timer (`phaseEndDate`) — do not revert to tick-based countdown
+
+## CI / Releases (`.github/workflows/release.yml`)
+- Triggered by pushing a `v*` tag; two jobs: `build` (on `macos-26`) then `release` (`needs: build`, on `ubuntu-latest`)
+- Build job: `xcodebuild -configuration Release` with `CODE_SIGNING_ALLOWED=NO`, zips `PomodoroBar.app` via `ditto`, writes a SHA-256 checksum, uploads as an artifact
+- Release job: `softprops/action-gh-release@v2` attaches the zip + checksums and creates a draft release with auto-generated notes
+- Version derives from the tag (`v1.1.0` → `1.1.0`); keep `MARKETING_VERSION` in the Xcode project in sync with the tag
+- App is unsigned/not notarized; Gatekeeper will warn first-time users until Developer ID/notarization is added
 
 ## Self-Update Rules
 Update this file when:
