@@ -54,7 +54,7 @@ xcodebuild -scheme PomodoroBar -configuration Debug build CODE_SIGNING_ALLOWED=N
 - Triggered by pushing a `v*` tag; two jobs: `build` (on `macos-26`) then `release` (`needs: build`, on `ubuntu-latest`)
 - Build job: `xcodebuild -configuration Release` with `CODE_SIGNING_ALLOWED=NO`, zips `PomodoroBar.app` via `ditto`, writes a SHA-256 checksum, uploads as an artifact
 - Release job: `softprops/action-gh-release@v2` attaches the zip + checksums and creates a draft release with auto-generated notes
-- Version derives from the tag (`v0.0.1` → `0.0.1`); keep `MARKETING_VERSION` in the Xcode project in sync with the tag
+- Version derives from the tag (`v0.0.1` → `0.0.1`); the build job overrides `MARKETING_VERSION` from the tag, so the built `CFBundleShortVersionString` always matches the tag (no manual project bump needed). A hard check fails the build if they ever diverge.
 - App is unsigned/not notarized; Gatekeeper will warn first-time users until Developer ID/notarization is added
 
 ## Self-Update Rules

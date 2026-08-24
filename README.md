@@ -66,13 +66,12 @@ open /Applications/PomodoroBar.app
 
 Releases are automated with GitHub Actions. Pushing a version tag builds the
 app on a GitHub-hosted macOS runner, then creates a GitHub Release with the
-app binary and auto-generated release notes attached.
+app binary and auto-generated release notes attached. The tag is the single
+source of truth — the build overrides the app's marketing version from the tag,
+so the built `CFBundleShortVersionString` always matches it (no manual Xcode
+project bump needed).
 
-1. Bump the version in the Xcode project: select the `PomodoroBar` target →
-   **General** → update **Version** (and the marketing version in the project file
-   if needed).
-2. Commit and push your changes, then create and push a tag matching the
-   version:
+1. Commit and push your changes, then create and push a version tag:
 
    ```bash
    git tag v0.0.1

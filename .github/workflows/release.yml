@@ -27,14 +27,18 @@ jobs:
         run: xcodebuild -version && xcode-select -p
 
       - name: Build Release
+        # The tag is the single source of truth: override MARKETING_VERSION so
+        # the built app's CFBundleShortVersionString always matches the tag,
+        # even if the project file was never bumped manually.
         run: xcodebuild -scheme PomodoroBar -configuration Release build \
-              CODE_SIGNING_ALLOWED=NO -derivedDataPath build
+              CODE_SIGNING_ALLOWED=NO -derivedDataPath build \
+              MARKETING_VERSION=$VERSION
 
       - name: Verify bundle version matches tag
         run: |
           built=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' \
             build/Build/Products/Release/PomodoroBar.app/Contents/Info.plist)
-          [ "$built" = "$VERSION" ] || echo "::warning::app version $built != tag $VERSION"
+          [ "$built" = "$VERSION" ] || { echo "::error::app version $built != tag $VERSION"; exit 1; }
 
       - name: Stage and zip app
         run: |
