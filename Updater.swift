@@ -40,6 +40,12 @@ final class Updater {
   var progress: Double = 0
   var error: String = ""
 
+  var isHomebrew: Bool {
+    let fm = FileManager.default
+    let paths = ["/opt/homebrew/Caskroom/pomodoro-bar", ("~/Caskroom/pomodoro-bar" as NSString).expandingTildeInPath]
+    return paths.contains { fm.fileExists(atPath: $0) }
+  }
+
   private var defaults = UserDefaults.standard
 
   private enum Keys {
@@ -137,6 +143,11 @@ final class Updater {
   /// update.sh does the swap + checksum + relaunch after we exit.
   func applyUpdate() {
     guard state == .available else { return }
+    if isHomebrew {
+      // If installed via Homebrew cask, guide the user to brew upgrade
+      error = "Run 'brew upgrade pomodoro-bar' in terminal to update."
+      return
+    }
     state = .downloading
     progress = 0
     error = ""

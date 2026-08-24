@@ -144,10 +144,10 @@ struct MenuBarView: View {
         } label: {
           updateButtonLabel
         }
-        .buttonStyle(.borderless)
-        .glassEffect(.regular.interactive(), in: Circle())
-        .accessibilityLabel("Update to v\(model.updater.latestVersion)")
-        .help("Update to v\(model.updater.latestVersion)")
+        .buttonStyle(.plain)
+        .background(Color.primary.opacity(0.1), in: Circle())
+        .accessibilityLabel(model.updater.isHomebrew ? "Manage with Homebrew" : "Update to v\(model.updater.latestVersion)")
+        .help(model.updater.isHomebrew ? "Manage with Homebrew" : "Update to v\(model.updater.latestVersion)")
         .disabled(model.updater.state == .downloading || model.updater.state == .updating)
       }
       .padding(.vertical, 8)
@@ -174,20 +174,28 @@ struct MenuBarView: View {
   }
 
   private var bannerTitle: String {
+    if model.updater.isHomebrew {
+      return "Update v\(model.updater.latestVersion) available via brew."
+    }
     switch model.updater.state {
     case .downloading:
-      "Downloading v\(model.updater.latestVersion) (\(Int(model.updater.progress * 100))%)"
+      return "Downloading v\(model.updater.latestVersion) (\(Int(model.updater.progress * 100))%)"
     case .updating:
-      "Installing v\(model.updater.latestVersion)"
+      return "Installing v\(model.updater.latestVersion)"
     default:
-      "New version v\(model.updater.latestVersion) available."
+      return "New version v\(model.updater.latestVersion) available."
     }
   }
 
   @ViewBuilder
   private var updateButtonLabel: some View {
     let u = model.updater
-    if u.state == .downloading || u.state == .updating {
+    if u.isHomebrew {
+      Image(systemName: "terminal")
+        .font(.system(size: 12, weight: .semibold))
+        .frame(width: 28, height: 28)
+        .contentShape(Circle())
+    } else if u.state == .downloading || u.state == .updating {
       ProgressView()
         .controlSize(.small)
         .frame(width: 28, height: 28)
@@ -217,8 +225,8 @@ struct MenuBarView: View {
           .frame(width: 24, height: 24)
           .contentShape(Circle())
       }
-      .buttonStyle(.borderless)
-      .glassEffect(.regular.interactive(), in: Circle())
+      .buttonStyle(.plain)
+      .background(Color.primary.opacity(0.08), in: Circle())
       .accessibilityLabel("Check for updates")
       .help("Check for updates")
     }

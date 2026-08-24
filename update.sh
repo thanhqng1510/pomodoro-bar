@@ -52,12 +52,14 @@ done
 
 # --- verify checksum (blocking is fine: we're the only writer) ---------
 if [[ -f "${WORKDIR}/checksums.txt" ]]; then
-  expected=$(grep "${APP_NAME}-.*\.zip" "${WORKDIR}/checksums.txt" | awk '{print $1}' | head -1)
+  expected=$(grep "${APP_NAME}-${version}\.zip" "${WORKDIR}/checksums.txt" | awk '{print $1}' | head -1)
   if [[ -n "$expected" ]]; then
     actual=$(shasum -a 256 "$ZIP" | awk '{print $1}')
     if [[ "$actual" != "$expected" ]]; then
       fail "checksum mismatch (expected ${expected}, got ${actual})"
     fi
+  else
+    fail "checksum not found in checksums.txt for ${APP_NAME}-${version}.zip"
   fi
 fi
 
@@ -65,7 +67,7 @@ fi
 [[ -d "$NEW_APP" ]] || ditto -x -k "$ZIP" "$WORKDIR"
 [[ -d "$NEW_APP" ]] || fail "no ${APP_NAME}.app inside ${WORKDIR}"
 
-# Replace /Applications copy (admin fallback mirrors install.sh)
+# Replace /Applications copy (admin fallback with graphical prompt if needed)
 replace_app() {
   rm -rf "${TARGET}.old"
   if [[ -d "$TARGET" ]]; then mv "$TARGET" "${TARGET}.old"; fi
@@ -73,9 +75,8 @@ replace_app() {
   codesign --force --sign - --deep "$TARGET" 2>/dev/null || true
 }
 if ! replace_app; then
-  sudo -p "Password required to update ${APP_NAME} in /Applications: " sh -c \
-    'rm -rf "/Applications/'"${APP_NAME}"'.old"; mv "/Applications/'"${APP_NAME}"'.app" "/Applications/'"${APP_NAME}"'.old"; ditto '"'$NEW_APP'"' "/Applications/'"${APP_NAME}"'.app"' \
-    && codesign --force --sign - --deep "$TARGET" 2>/dev/null || fail "could not replace app"
+  # If running detached without interactive TTY, use osascript graphical administrator prompt
+  osascript -e "do shell script \"rm -rf \\\"${TARGET}.old\\\"; if [ -d \\\"${TARGET}\\\" ]; then mv \\\"${TARGET}\\\" \\\"${TARGET}.old\\\"; fi; ditto \\\"${NEW_APP}\\\" \\\"${TARGET}\\\"; codesign --force --sign - --deep \\\"${TARGET}\\\" 2>/dev/null || true\" with administrator privileges" 2>/dev/null || fail "could not replace app in /Applications"
 fi
 
 # Pre-warm Gatekeeper so the relaunched app isn't stuck on "Verifying…".

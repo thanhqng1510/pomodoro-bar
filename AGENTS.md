@@ -22,9 +22,9 @@ Assets.xcassets/       # Icons, phase colors, AccentColor
 ## In-App Auto-Update (Updater.swift + update.sh)
 - Checks GitHub `releases/latest` on launch (cached to 1/day via `UserDefaults.lastUpdateCheckDate`) or on "Check for Updates…" (force); parses `tag_name` by string-scanning the JSON (no JSON decoder dependency), compares semver `a.b.c`
 - On "Download": downloads `PomodoroBar-<ver>.zip` + `checksums.txt` to a temp work dir, writes an `update.manifest`, copies `update.sh` out of the bundle, makes it executable, then `NSApp.terminate`
-- `update.sh` (detached via `posix_spawn` `POSIX_SPAWN_SETSID` — survives app exit): verifies SHA-256 against `checksums.txt` first (aborts with a status file on mismatch, nothing changed), waits for the app to quit, swaps `/Applications/PomodoroBar.app` via `mv` → `.old` + `ditto` (with `sudo` fallback and `codesign --force` ad-hoc, mirroring install.sh), runs `gktool scan` if present, relaunches via `open`
-- Homebrew-cask guard: if `/opt/homebrew/Caskroom/pomodoro-bar` (or `~/Caskroom`) exists, the helper refuses to self-swap and points to `brew upgrade` (a self-swap would desync the Caskroom)
-- Update UI (Settings): inline banner "New version vX.Y.Z available" with a **Download** button that morphs into a progress spinner/% while downloading; states: checking / up-to-date / error (retry)
+- `update.sh` (detached via `posix_spawn` `POSIX_SPAWN_SETSID` — survives app exit): verifies SHA-256 against `checksums.txt` first (aborts with a status file on mismatch, nothing changed, relaunches app), waits for the app to quit, swaps `/Applications/PomodoroBar.app` via `mv` → `.old` + `ditto` (with graphical admin fallback via osascript and `codesign --force` ad-hoc, mirroring install.sh), runs `gktool scan` if present, relaunches via `open`
+- Homebrew-cask guard: if `/opt/homebrew/Caskroom/pomodoro-bar` (or `~/Caskroom`) exists, detected preemptively in UI & in `update.sh` helper to redirect to `brew upgrade` (a self-swap would desync the Caskroom)
+- Update UI (Settings): inline banner "New version vX.Y.Z available" with a circular download icon button that morphs into a progress spinner/% while downloading; states: checking / up-to-date / error (retry)
 - `update.sh`'s `TARGET` is overridable via `PB_TARGET` env for tests
 
 ## Distribution (install.sh)
@@ -39,7 +39,7 @@ xcodebuild -scheme PomodoroBar -configuration Debug build CODE_SIGNING_ALLOWED=N
 ```
 
 ## Code Style
-- **Imports**: SwiftUI, Foundation, AppKit, UserNotifications (one per line)
+- **Imports**: SwiftUI, Foundation, AppKit, UserNotifications, Darwin (one per line)
 - **Naming**: PascalCase types, camelCase variables/functions, `is/has` prefix for booleans
 - **SwiftUI**: `@MainActor @Observable` models, computed properties for views, `.foregroundStyle()`
 - **Indentation**: 2 spaces
