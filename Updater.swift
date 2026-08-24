@@ -135,7 +135,7 @@ final class Updater {
   /// Downloads the new release zip and sidecar manifests, then detaches the
   /// update helper and quits. The running bundle can't be replaced in place, so
   /// update.sh does the swap + checksum + relaunch after we exit.
-  func downloadAndUpdate() {
+  func applyUpdate() {
     guard state == .available else { return }
     state = .downloading
     progress = 0
@@ -155,7 +155,15 @@ final class Updater {
         guard zipURL != nil else { return self.fail("Bad release download URL.") }
         guard cksURL != nil else { return self.fail("Bad release download URL.") }
 
-        let (zipData, _) = try await session.data(from: zipURL!)
+        // Stream the zip so we can report real progress on the Download button.
+        let (zipBytes, zipResponse) = try await session.bytes(from: zipURL!)
+        let total = Double(zipResponse.expectedContentLength)
+        var zipData = Data()
+        for try await byte in zipBytes {
+          zipData.append(byte)
+          if total > 0 { self.progress = min(1, Double(zipData.count) / total) }
+        }
+        self.progress = 1
         let (cksData, _) = try await session.data(from: cksURL!)
         let cks = String(data: cksData, encoding: .utf8) ?? ""
 

@@ -19,7 +19,15 @@ MANIFEST="${WORKDIR}/update.manifest"
 STATUS="${WORKDIR}/update.status"
 
 log() { printf '[updater] %s\n' "$*"; }
-fail() { printf '[updater] ERROR: %s\n' "$*" >&2; echo "failed: $*" > "$STATUS"; exit 1; }
+warn() { printf '[updater] WARN: %s\n' "$*"; }
+fail() {
+  printf '[updater] ERROR: %s\n' "$*" >&2
+  echo "failed: $*" > "$STATUS"
+  # Roll back: relaunch the current /Applications app so the user isn't left
+  # with a dead menu bar icon after a failed update.
+  if [[ -d "$TARGET" ]]; then open "$TARGET" 2>/dev/null; fi
+  exit 1
+}
 
 version=""
 if [[ -f "$MANIFEST" ]]; then

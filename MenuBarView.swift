@@ -118,12 +118,13 @@ struct MenuBarView: View {
   // MARK: - Update UI
   @ViewBuilder
   private var updateBanner: some View {
-    if model.updater.state == .available {
+    switch model.updater.state {
+    case .available, .downloading, .updating:
       HStack(spacing: 8) {
         Image(systemName: "sparkles")
           .font(.system(size: 13))
         VStack(alignment: .leading, spacing: 2) {
-          Text("New version v\(model.updater.latestVersion) available.")
+          Text(bannerTitle)
             .font(.system(size: 11.5, weight: .bold))
           if !model.updater.error.isEmpty {
             Text(model.updater.error)
@@ -134,7 +135,7 @@ struct MenuBarView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
 
         Button {
-          model.updater.downloadAndUpdate()
+          model.updater.applyUpdate()
         } label: {
           updateButtonLabel
         }
@@ -146,7 +147,7 @@ struct MenuBarView: View {
       .padding(.vertical, 8)
       .padding(.horizontal, 10)
       .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
-    } else if model.updater.state == .checking {
+    case .checking:
       HStack(spacing: 8) {
         Image(systemName: "stethoscope")  // placeholder while thinking
           .font(.system(size: 10))
@@ -156,10 +157,23 @@ struct MenuBarView: View {
       .padding(.vertical, 6)
       .padding(.horizontal, 10)
       .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
-    } else if model.updater.state == .upToDate {
+    case .upToDate:
       rowStatus("Up to date (v\(model.updater.currentVersion)).", "checkmark.circle")
-    } else if !model.updater.error.isEmpty {
-      rowStatus(model.updater.error, "exclamationmark.triangle")
+    case .idle, .error:
+      if !model.updater.error.isEmpty {
+        rowStatus(model.updater.error, "exclamationmark.triangle")
+      }
+    }
+  }
+
+  private var bannerTitle: String {
+    switch model.updater.state {
+    case .downloading:
+      "Downloading v\(model.updater.latestVersion)… \(Int(model.updater.progress * 100))%"
+    case .updating:
+      "Installing v\(model.updater.latestVersion)…"
+    default:
+      "New version v\(model.updater.latestVersion) available."
     }
   }
 
@@ -167,9 +181,13 @@ struct MenuBarView: View {
   private var updateButtonLabel: some View {
     let u = model.updater
     if u.state == .downloading {
-      ProgressView(value: u.progress)
-        .controlSize(.small)
-        .frame(width: 16, height: 16)
+      HStack(spacing: 4) {
+        ProgressView(value: u.progress)
+          .controlSize(.small)
+          .frame(width: 16, height: 16)
+        Text("\(Int(u.progress * 100))%")
+          .font(.system(size: 10, weight: .medium, design: .monospaced))
+      }
     } else if u.state == .updating {
       ProgressView()
         .controlSize(.small)
