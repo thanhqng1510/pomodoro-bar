@@ -109,7 +109,7 @@ final class TimerModel {
     completedPomodoros = max(0, defaults.integer(forKey: Keys.completedPomodoros))
 
     registerNotificationCategories()
-    updater.checkForUpdates()  // throttled to once/day internally
+    updater.checkForUpdates(force: true)  // verify on every launch so an update is never hidden by the daily throttle
     resetToPhase(.focus)
   }
 
