@@ -169,9 +169,9 @@ struct MenuBarView: View {
   private var bannerTitle: String {
     switch model.updater.state {
     case .downloading:
-      "Downloading v\(model.updater.latestVersion)… \(Int(model.updater.progress * 100))%"
+      "Downloading v\(model.updater.latestVersion) (\(Int(model.updater.progress * 100))%)"
     case .updating:
-      "Installing v\(model.updater.latestVersion)…"
+      "Installing v\(model.updater.latestVersion)"
     default:
       "New version v\(model.updater.latestVersion) available."
     }
