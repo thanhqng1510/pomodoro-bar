@@ -165,7 +165,7 @@ struct MenuBarView: View {
       .padding(.horizontal, 10)
       .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
     case .upToDate:
-      rowStatus("Up to date (v\(model.updater.currentVersion)).", "checkmark.circle")
+      rowStatus("Up to date (v\(model.updater.currentVersion))", "checkmark.circle")
     case .idle, .error:
       if !model.updater.error.isEmpty {
         rowStatus(model.updater.error, "exclamationmark.triangle")
