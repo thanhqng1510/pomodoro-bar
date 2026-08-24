@@ -9,11 +9,21 @@ PomodoroBarApp.swift   # App entry, notification delegate
 TimerModel.swift       # Business logic, state, notifications, UserDefaults persistence
 TimerRingView.swift    # Animated progress ring, cycle dots
 MenuBarView.swift      # Main UI, controls, settings
+Updater.swift          # In-app auto-updater: GitHub releases check, download, detach helper
+update.sh              # Detached swap helper used by Updater (SHA-256 verify, /Applications swap, relaunch)
 install.sh             # curl-based CLI installer (reuses release zip + checksums)
 uninstall.sh           # CLI uninstaller
 Assets.xcassets/       # Icons, phase colors, AccentColor
 .github/workflows/     # CI: auto-build + release on tag push
 ```
+
+## In-App Auto-Update (Updater.swift + update.sh)
+- Checks GitHub `releases/latest` on launch (cached to 1/day via `UserDefaults.lastUpdateCheckDate`) or on "Check for Updates…" (force); parses `tag_name` by string-scanning the JSON (no JSON decoder dependency), compares semver `a.b.c`
+- On "Download": downloads `PomodoroBar-<ver>.zip` + `checksums.txt` to a temp work dir, writes an `update.manifest`, copies `update.sh` out of the bundle, makes it executable, then `NSApp.terminate`
+- `update.sh` (detached via `posix_spawn` `POSIX_SPAWN_SETSID` — survives app exit): verifies SHA-256 against `checksums.txt` first (aborts with a status file on mismatch, nothing changed), waits for the app to quit, swaps `/Applications/PomodoroBar.app` via `mv` → `.old` + `ditto` (with `sudo` fallback and `codesign --force` ad-hoc, mirroring install.sh), runs `gktool scan` if present, relaunches via `open`
+- Homebrew-cask guard: if `/opt/homebrew/Caskroom/pomodoro-bar` (or `~/Caskroom`) exists, the helper refuses to self-swap and points to `brew upgrade` (a self-swap would desync the Caskroom)
+- Update UI (Settings): inline banner "New version vX.Y.Z available" with a **Download** button that morphs into a progress spinner/% while downloading; states: checking / up-to-date / error (retry)
+- `update.sh`'s `TARGET` is overridable via `PB_TARGET` env for tests
 
 ## Distribution (install.sh)
 - Users install via `curl -fsSL https://raw.githubusercontent.com/thanhqng1510/pomodoro-bar/main/install.sh | bash`

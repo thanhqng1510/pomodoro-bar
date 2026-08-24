@@ -12,6 +12,7 @@ A minimal macOS menu bar Pomodoro timer built with SwiftUI.
 - **Quick controls** - Start, pause, reset, and skip from the menu bar
 - **Persistent settings** - Durations and preferences are saved between launches
 - **Cycle tracking** - Dots show your progress toward the long break
+- **Auto-update** - Checks GitHub for new releases (once a day), shows an "Update available" banner in Settings with a one-click Download that verifies the SHA-256 checksum before replacing the app
 
 ## Screenshots
 

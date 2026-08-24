@@ -105,6 +105,7 @@ struct MenuBarView: View {
 
   private var settingsContent: some View {
     VStack(spacing: 10) {
+      updateBanner
       durationsSection
       toggleSection
       permissionButton
@@ -112,6 +113,94 @@ struct MenuBarView: View {
     .padding(.horizontal, 16)
     .padding(.top, 2)
     .padding(.bottom, 14)
+  }
+
+  // MARK: - Update UI
+  @ViewBuilder
+  private var updateBanner: some View {
+    if model.updater.state == .available {
+      HStack(spacing: 8) {
+        Image(systemName: "sparkles")
+          .font(.system(size: 13))
+        VStack(alignment: .leading, spacing: 2) {
+          Text("New version v\(model.updater.latestVersion) available.")
+            .font(.system(size: 11.5, weight: .bold))
+          if !model.updater.error.isEmpty {
+            Text(model.updater.error)
+              .font(.system(size: 10))
+              .foregroundStyle(.red)
+          }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+
+        Button {
+          model.updater.downloadAndUpdate()
+        } label: {
+          updateButtonLabel
+        }
+        .buttonStyle(.borderless)
+        .glassEffect(.regular.interactive(), in: Capsule())
+        .controlSize(.small)
+        .disabled(model.updater.state == .downloading || model.updater.state == .updating)
+      }
+      .padding(.vertical, 8)
+      .padding(.horizontal, 10)
+      .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
+    } else if model.updater.state == .checking {
+      HStack(spacing: 8) {
+        Image(systemName: "stethoscope")  // placeholder while thinking
+          .font(.system(size: 10))
+        Text("Checking for updates…")
+          .font(.system(size: 11))
+      }
+      .padding(.vertical, 6)
+      .padding(.horizontal, 10)
+      .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
+    } else if model.updater.state == .upToDate {
+      rowStatus("Up to date (v\(model.updater.currentVersion)).", "checkmark.circle")
+    } else if !model.updater.error.isEmpty {
+      rowStatus(model.updater.error, "exclamationmark.triangle")
+    }
+  }
+
+  @ViewBuilder
+  private var updateButtonLabel: some View {
+    let u = model.updater
+    if u.state == .downloading {
+      ProgressView(value: u.progress)
+        .controlSize(.small)
+        .frame(width: 16, height: 16)
+    } else if u.state == .updating {
+      ProgressView()
+        .controlSize(.small)
+        .frame(width: 16, height: 16)
+    } else {
+      Text("Download")
+        .font(.system(size: 11, weight: .medium))
+    }
+  }
+
+  @ViewBuilder
+  private func rowStatus(_ text: String, _ icon: String) -> some View {
+    HStack(spacing: 8) {
+      Image(systemName: icon)
+        .font(.system(size: 10))
+        .foregroundStyle(.secondary)
+      Text(text)
+        .font(.system(size: 11))
+        .frame(maxWidth: .infinity, alignment: .leading)
+      Button {
+        model.updater.checkForUpdates(force: true)
+      } label: {
+        Text("Check again")
+          .font(.system(size: 11, weight: .medium))
+      }
+      .buttonStyle(.borderless)
+      .glassEffect(.regular.interactive(), in: Capsule())
+    }
+    .padding(.vertical, 6)
+    .padding(.horizontal, 10)
+    .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
   }
 
   // MARK: - Control Buttons

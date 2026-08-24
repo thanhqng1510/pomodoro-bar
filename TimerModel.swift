@@ -31,6 +31,8 @@ final class TimerModel {
   }
 
   // MARK: - Settings (persisted to UserDefaults)
+  var updater = Updater()
+
   var focusDuration: Int {
     didSet {
       defaults.set(focusDuration, forKey: Keys.focusDuration)
@@ -107,6 +109,7 @@ final class TimerModel {
     completedPomodoros = max(0, defaults.integer(forKey: Keys.completedPomodoros))
 
     registerNotificationCategories()
+    updater.checkForUpdates()  // throttled to once/day internally
     resetToPhase(.focus)
   }
 
