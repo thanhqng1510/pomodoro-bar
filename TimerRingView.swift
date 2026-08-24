@@ -43,8 +43,7 @@ struct TimerRingView: View {
           .foregroundStyle(.secondary)
           .textCase(.uppercase)
           .tracking(0.8)
-          .lineLimit(1)
-          .minimumScaleFactor(0.8)
+          .multilineTextAlignment(.center)
       }
     }
     .frame(width: 150, height: 150)

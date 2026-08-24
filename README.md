@@ -12,6 +12,7 @@ A minimal macOS menu bar Pomodoro timer built with SwiftUI.
 - **Quick controls** - Start, pause, reset, and skip from the menu bar
 - **Persistent settings** - Durations and preferences are saved between launches
 - **Cycle tracking** - Dots show your progress toward the long break
+- **Auto-update** - Checks GitHub for new releases (once a day), shows an "Update available" banner in Settings with a one-click Download that verifies the SHA-256 checksum before replacing the app
 
 ## Screenshots
 
@@ -66,13 +67,11 @@ open /Applications/PomodoroBar.app
 
 Releases are automated with GitHub Actions. Pushing a version tag builds the
 app on a GitHub-hosted macOS runner, then creates a GitHub Release with the
-app binary and auto-generated release notes attached.
+app binary and auto-generated release notes attached. The tag is the single
+source of truth — `set-version.sh` stamps it into both the version constant the
+updater reads and the app's Info.plist during the build.
 
-1. Bump the version in the Xcode project: select the `PomodoroBar` target →
-   **General** → update **Version** (and the marketing version in the project file
-   if needed).
-2. Commit and push your changes, then create and push a tag matching the
-   version:
+1. Commit and push your changes, then create and push a version tag:
 
    ```bash
    git tag v0.0.1
@@ -82,8 +81,10 @@ app binary and auto-generated release notes attached.
    The `refs/tags/` prefix makes it explicit that you're pushing the tag, so
    it can't be confused with a branch of the same name.
 
-3. The workflow runs in **Actions**: a build job compiles the app and uploads
-   it, then a release job creates and **publishes** the release on the
+2. The workflow runs in **Actions**: the build job stamps the version from the
+   tag, compiles the app (a hard check fails if the built version doesn't match
+   the tag), and uploads it; then a release job creates and **publishes** the
+   release on the
    [Releases](https://github.com/thanhqng1510/pomodoro-bar/releases) page
    with auto-generated notes. Because releases publish automatically, review
    the tag and changelog **before** pushing it.

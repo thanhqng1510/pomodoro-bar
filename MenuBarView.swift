@@ -105,6 +105,7 @@ struct MenuBarView: View {
 
   private var settingsContent: some View {
     VStack(spacing: 10) {
+      updateBanner
       durationsSection
       toggleSection
       permissionButton
@@ -112,6 +113,126 @@ struct MenuBarView: View {
     .padding(.horizontal, 16)
     .padding(.top, 2)
     .padding(.bottom, 14)
+  }
+
+  // MARK: - Update UI
+  @ViewBuilder
+  private var updateBanner: some View {
+    switch model.updater.state {
+    case .available, .downloading, .updating:
+      HStack(alignment: .center, spacing: 8) {
+        Image(systemName: "sparkles")
+          .font(.system(size: 13))
+          .foregroundStyle(.primary)
+
+        VStack(alignment: .leading, spacing: 2) {
+          Text(bannerTitle)
+            .font(.system(size: 11, weight: .semibold))
+            .fixedSize(horizontal: false, vertical: true)
+            .multilineTextAlignment(.leading)
+          if !model.updater.error.isEmpty {
+            Text(model.updater.error)
+              .font(.system(size: 10))
+              .foregroundStyle(.red)
+              .fixedSize(horizontal: false, vertical: true)
+          }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+
+        Button {
+          model.updater.applyUpdate()
+        } label: {
+          updateButtonLabel
+        }
+        .buttonStyle(.plain)
+        .background(Color.primary.opacity(0.1), in: Circle())
+        .accessibilityLabel(model.updater.isHomebrew ? "Manage with Homebrew" : "Update to v\(model.updater.latestVersion)")
+        .help(model.updater.isHomebrew ? "Manage with Homebrew" : "Update to v\(model.updater.latestVersion)")
+        .disabled(model.updater.state == .downloading || model.updater.state == .updating)
+      }
+      .padding(.vertical, 8)
+      .padding(.horizontal, 10)
+      .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
+    case .checking:
+      HStack(spacing: 8) {
+        Image(systemName: "arrow.triangle.2.circlepath")
+          .font(.system(size: 10))
+        Text("Checking for updates…")
+          .font(.system(size: 11))
+          .fixedSize(horizontal: false, vertical: true)
+      }
+      .padding(.vertical, 6)
+      .padding(.horizontal, 10)
+      .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
+    case .upToDate:
+      rowStatus("Up to date (v\(model.updater.currentVersion)).", "checkmark.circle")
+    case .idle, .error:
+      if !model.updater.error.isEmpty {
+        rowStatus(model.updater.error, "exclamationmark.triangle")
+      }
+    }
+  }
+
+  private var bannerTitle: String {
+    if model.updater.isHomebrew {
+      return "Update v\(model.updater.latestVersion) available via brew."
+    }
+    switch model.updater.state {
+    case .downloading:
+      return "Downloading v\(model.updater.latestVersion) (\(Int(model.updater.progress * 100))%)"
+    case .updating:
+      return "Installing v\(model.updater.latestVersion)"
+    default:
+      return "New version v\(model.updater.latestVersion) available."
+    }
+  }
+
+  @ViewBuilder
+  private var updateButtonLabel: some View {
+    let u = model.updater
+    if u.isHomebrew {
+      Image(systemName: "terminal")
+        .font(.system(size: 12, weight: .semibold))
+        .frame(width: 28, height: 28)
+        .contentShape(Circle())
+    } else if u.state == .downloading || u.state == .updating {
+      ProgressView()
+        .controlSize(.small)
+        .frame(width: 28, height: 28)
+    } else {
+      Image(systemName: "arrow.down.circle.fill")
+        .font(.system(size: 16))
+        .frame(width: 28, height: 28)
+        .contentShape(Circle())
+    }
+  }
+
+  @ViewBuilder
+  private func rowStatus(_ text: String, _ icon: String) -> some View {
+    HStack(spacing: 8) {
+      Image(systemName: icon)
+        .font(.system(size: 10))
+        .foregroundStyle(.secondary)
+      Text(text)
+        .font(.system(size: 11))
+        .fixedSize(horizontal: false, vertical: true)
+        .frame(maxWidth: .infinity, alignment: .leading)
+      Button {
+        model.updater.checkForUpdates(force: true)
+      } label: {
+        Image(systemName: "arrow.clockwise")
+          .font(.system(size: 11, weight: .medium))
+          .frame(width: 24, height: 24)
+          .contentShape(Circle())
+      }
+      .buttonStyle(.plain)
+      .background(Color.primary.opacity(0.08), in: Circle())
+      .accessibilityLabel("Check for updates")
+      .help("Check for updates")
+    }
+    .padding(.vertical, 6)
+    .padding(.horizontal, 10)
+    .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
   }
 
   // MARK: - Control Buttons
