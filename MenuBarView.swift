@@ -120,16 +120,21 @@ struct MenuBarView: View {
   private var updateBanner: some View {
     switch model.updater.state {
     case .available, .downloading, .updating:
-      HStack(spacing: 8) {
+      HStack(alignment: .center, spacing: 8) {
         Image(systemName: "sparkles")
           .font(.system(size: 13))
+          .foregroundStyle(.primary)
+
         VStack(alignment: .leading, spacing: 2) {
           Text(bannerTitle)
-            .font(.system(size: 11.5, weight: .bold))
+            .font(.system(size: 11, weight: .semibold))
+            .fixedSize(horizontal: false, vertical: true)
+            .multilineTextAlignment(.leading)
           if !model.updater.error.isEmpty {
             Text(model.updater.error)
               .font(.system(size: 10))
               .foregroundStyle(.red)
+              .fixedSize(horizontal: false, vertical: true)
           }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -142,6 +147,7 @@ struct MenuBarView: View {
         .buttonStyle(.borderless)
         .glassEffect(.regular.interactive(), in: Capsule())
         .controlSize(.small)
+        .fixedSize()
         .disabled(model.updater.state == .downloading || model.updater.state == .updating)
       }
       .padding(.vertical, 8)
@@ -149,10 +155,11 @@ struct MenuBarView: View {
       .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
     case .checking:
       HStack(spacing: 8) {
-        Image(systemName: "stethoscope")  // placeholder while thinking
+        Image(systemName: "arrow.triangle.2.circlepath")
           .font(.system(size: 10))
         Text("Checking for updates…")
           .font(.system(size: 11))
+          .fixedSize(horizontal: false, vertical: true)
       }
       .padding(.vertical, 6)
       .padding(.horizontal, 10)
@@ -206,6 +213,7 @@ struct MenuBarView: View {
         .foregroundStyle(.secondary)
       Text(text)
         .font(.system(size: 11))
+        .fixedSize(horizontal: false, vertical: true)
         .frame(maxWidth: .infinity, alignment: .leading)
       Button {
         model.updater.checkForUpdates(force: true)
@@ -215,6 +223,7 @@ struct MenuBarView: View {
       }
       .buttonStyle(.borderless)
       .glassEffect(.regular.interactive(), in: Capsule())
+      .fixedSize()
     }
     .padding(.vertical, 6)
     .padding(.horizontal, 10)
