@@ -145,9 +145,9 @@ struct MenuBarView: View {
           updateButtonLabel
         }
         .buttonStyle(.borderless)
-        .glassEffect(.regular.interactive(), in: Capsule())
-        .controlSize(.small)
-        .fixedSize()
+        .glassEffect(.regular.interactive(), in: Circle())
+        .accessibilityLabel("Update to v\(model.updater.latestVersion)")
+        .help("Update to v\(model.updater.latestVersion)")
         .disabled(model.updater.state == .downloading || model.updater.state == .updating)
       }
       .padding(.vertical, 8)
@@ -187,21 +187,15 @@ struct MenuBarView: View {
   @ViewBuilder
   private var updateButtonLabel: some View {
     let u = model.updater
-    if u.state == .downloading {
-      HStack(spacing: 4) {
-        ProgressView(value: u.progress)
-          .controlSize(.small)
-          .frame(width: 16, height: 16)
-        Text("\(Int(u.progress * 100))%")
-          .font(.system(size: 10, weight: .medium, design: .monospaced))
-      }
-    } else if u.state == .updating {
+    if u.state == .downloading || u.state == .updating {
       ProgressView()
         .controlSize(.small)
-        .frame(width: 16, height: 16)
+        .frame(width: 28, height: 28)
     } else {
-      Text("Download")
-        .font(.system(size: 11, weight: .medium))
+      Image(systemName: "arrow.down.circle.fill")
+        .font(.system(size: 16))
+        .frame(width: 28, height: 28)
+        .contentShape(Circle())
     }
   }
 
@@ -218,12 +212,15 @@ struct MenuBarView: View {
       Button {
         model.updater.checkForUpdates(force: true)
       } label: {
-        Text("Check again")
+        Image(systemName: "arrow.clockwise")
           .font(.system(size: 11, weight: .medium))
+          .frame(width: 24, height: 24)
+          .contentShape(Circle())
       }
       .buttonStyle(.borderless)
-      .glassEffect(.regular.interactive(), in: Capsule())
-      .fixedSize()
+      .glassEffect(.regular.interactive(), in: Circle())
+      .accessibilityLabel("Check for updates")
+      .help("Check for updates")
     }
     .padding(.vertical, 6)
     .padding(.horizontal, 10)
