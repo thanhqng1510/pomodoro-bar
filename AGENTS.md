@@ -10,7 +10,9 @@ TimerModel.swift       # Business logic, state, notifications, UserDefaults pers
 TimerRingView.swift    # Animated progress ring, cycle dots
 MenuBarView.swift      # Main UI, controls, settings
 Updater.swift          # In-app auto-updater: GitHub releases check, download, detach helper
+AppVersion.swift       # Version constant, stamped from the release tag by set-version.sh
 update.sh              # Detached swap helper used by Updater (SHA-256 verify, /Applications swap, relaunch)
+set-version.sh         # Stamps a version/tag into AppVersion.swift + project.pbxproj (CI release)
 install.sh             # curl-based CLI installer (reuses release zip + checksums)
 uninstall.sh           # CLI uninstaller
 Assets.xcassets/       # Icons, phase colors, AccentColor
@@ -64,7 +66,7 @@ xcodebuild -scheme PomodoroBar -configuration Debug build CODE_SIGNING_ALLOWED=N
 - Triggered by pushing a `v*` tag; two jobs: `build` (on `macos-26`) then `release` (`needs: build`, on `ubuntu-latest`)
 - Build job: `xcodebuild -configuration Release` with `CODE_SIGNING_ALLOWED=NO`, zips `PomodoroBar.app` via `ditto`, writes a SHA-256 checksum, uploads as an artifact
 - Release job: `softprops/action-gh-release@v2` attaches the zip + checksums and creates a draft release with auto-generated notes
-- Version derives from the tag (`v0.0.1` → `0.0.1`); keep `MARKETING_VERSION` in the Xcode project in sync with the tag
+- Version derives from the tag (`v0.0.1` → `0.0.1`); the build job runs `./set-version.sh "$VERSION"` before building, which stamps the version into `AppVersion.swift` (read by the updater) and `MARKETING_VERSION` in project.pbxproj (generates the Info.plist) — the tag is the single source of truth, no manual project bump needed. A hard check fails the build if the built `CFBundleShortVersionString` ever diverges from the tag.
 - App is unsigned/not notarized; Gatekeeper will warn first-time users until Developer ID/notarization is added
 
 ## Self-Update Rules

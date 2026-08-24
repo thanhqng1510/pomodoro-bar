@@ -23,6 +23,12 @@ jobs:
           VERSION=${GITHUB_REF_NAME#v}
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
 
+      - name: Stamp version into source
+        run: |
+          # The tag is the single source of truth: rewrite AppVersion.swift and
+          # MARKETING_VERSION in project.pbxproj before building.
+          ./set-version.sh "$VERSION"
+
       - name: Verify runner SDK
         run: xcodebuild -version && xcode-select -p
 
@@ -34,7 +40,7 @@ jobs:
         run: |
           built=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' \
             build/Build/Products/Release/PomodoroBar.app/Contents/Info.plist)
-          [ "$built" = "$VERSION" ] || echo "::warning::app version $built != tag $VERSION"
+          [ "$built" = "$VERSION" ] || { echo "::error::app version $built != tag $VERSION"; exit 1; }
 
       - name: Stage and zip app
         run: |

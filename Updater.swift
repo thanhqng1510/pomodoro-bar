@@ -47,7 +47,8 @@ final class Updater {
   }
 
   init() {
-    currentVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.0.0"
+    // AppVersion.current is stamped from the release tag by set-version.sh.
+    currentVersion = AppVersion.current
   }
 
   // MARK: - Checking
