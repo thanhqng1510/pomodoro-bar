@@ -17,7 +17,7 @@ struct MenuBarView: View {
     }
     .frame(width: 260)
     .onAppear {
-      checkNotificationPermission()
+      Task { await checkNotificationPermission() }
     }
   }
 
@@ -313,7 +313,7 @@ struct MenuBarView: View {
         .controlSize(.small)
         .onChange(of: model.notificationEnabled) { _, isOn in
           if isOn, notificationStatus == .notDetermined {
-            requestNotificationPermission()
+            Task { await requestNotificationPermission() }
           }
         }
     }
@@ -352,32 +352,23 @@ struct MenuBarView: View {
     if notificationStatus == .denied {
       openNotificationSettings()
     } else {
-      requestNotificationPermission()
+      Task { await requestNotificationPermission() }
     }
   }
 
   private func openNotificationSettings() {
-    if let url = URL(string: "x-apple.systempreferences:com.apple.Notifications-Settings.extension") {
-      NSWorkspace.shared.open(url)
-    }
+    NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.notifications")!)
   }
 
-  private func requestNotificationPermission() {
+  private func requestNotificationPermission() async {
     guard notificationStatus == .notDetermined else { return }
-    UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
-      DispatchQueue.main.async {
-        notificationStatus = granted ? .authorized : .denied
-      }
-    }
+    let granted = try? await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge])
+    notificationStatus = granted == true ? .authorized : .denied
   }
 
-  private func checkNotificationPermission() {
-    UNUserNotificationCenter.current().getNotificationSettings { settings in
-      let status = settings.authorizationStatus
-      DispatchQueue.main.async {
-        notificationStatus = status
-      }
-    }
+  private func checkNotificationPermission() async {
+    let settings = await UNUserNotificationCenter.current().notificationSettings()
+    notificationStatus = settings.authorizationStatus
   }
 }
 
