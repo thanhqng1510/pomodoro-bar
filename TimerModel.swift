@@ -1,6 +1,6 @@
 import Foundation
 import AppKit
-@preconcurrency import UserNotifications
+import UserNotifications
 
 enum Phase: String, CaseIterable, Identifiable {
   case focus = "Focus"
@@ -8,14 +8,6 @@ enum Phase: String, CaseIterable, Identifiable {
   case longBreak = "Long Break"
 
   var id: String { rawValue }
-
-  var icon: String {
-    switch self {
-    case .focus: "circle.inset.filled"
-    case .shortBreak: "cup.and.saucer"
-    case .longBreak: "moon"
-    }
-  }
 }
 
 @MainActor
@@ -196,7 +188,7 @@ final class TimerModel {
 
   private func completePhase() {
     pause()
-    sendNotification()
+    Task { await sendNotification() }
     advancePhase()
   }
 
@@ -231,37 +223,37 @@ final class TimerModel {
     UNUserNotificationCenter.current().setNotificationCategories([category])
   }
 
-  private func sendNotification() {
+  private func sendNotification() async {
     let center = UNUserNotificationCenter.current()
     center.removeAllPendingNotificationRequests()
     center.removeAllDeliveredNotifications()
 
     guard notificationEnabled else { return }
 
-    center.getNotificationSettings { [phase = self.phase] settings in
-      guard settings.authorizationStatus == .authorized else { return }
-      let content = UNMutableNotificationContent()
-      switch phase {
-      case .focus:
-        content.title = "Focus Complete!"
-        content.body = "Great work. Time for a break."
-      case .shortBreak:
-        content.title = "Break Over"
-        content.body = "Ready to focus again?"
-      case .longBreak:
-        content.title = "Long Break Over"
-        content.body = "Let's get back to work!"
-      }
-      content.sound = .default
-      content.categoryIdentifier = "PHASE_COMPLETE"
-      content.interruptionLevel = .timeSensitive
-      let request = UNNotificationRequest(
-        identifier: UUID().uuidString,
-        content: content,
-        trigger: nil
-      )
-      center.add(request)
+    let settings = await center.notificationSettings()
+    guard settings.authorizationStatus == .authorized else { return }
+
+    let content = UNMutableNotificationContent()
+    switch phase {
+    case .focus:
+      content.title = "Focus Complete!"
+      content.body = "Great work. Time for a break."
+    case .shortBreak:
+      content.title = "Break Over"
+      content.body = "Ready to focus again?"
+    case .longBreak:
+      content.title = "Long Break Over"
+      content.body = "Let's get back to work!"
     }
+    content.sound = .default
+    content.categoryIdentifier = "PHASE_COMPLETE"
+    content.interruptionLevel = .timeSensitive
+    let request = UNNotificationRequest(
+      identifier: UUID().uuidString,
+      content: content,
+      trigger: nil
+    )
+    try? await center.add(request)
   }
 
   func handleNotificationAction() {

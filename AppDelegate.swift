@@ -24,7 +24,7 @@ class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
       }
     } else {
       await MainActor.run {
-        NSApp.activate(ignoringOtherApps: true)
+        NSApp.activate()
       }
     }
   }
