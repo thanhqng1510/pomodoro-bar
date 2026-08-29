@@ -6,7 +6,7 @@ A minimal macOS menu bar Pomodoro timer built with SwiftUI.
 
 - **Menu bar timer** - Lives in your menu bar, always accessible
 - **Pomodoro technique** - Focus sessions with short and long breaks
-- **Progress ring** - Visual animated progress indicator
+- **Progress ring** - Visual animated progress indicator with scale effect on pause/resume
 - **Customizable durations** - Configure focus, short break, and long break times
 - **Notifications** - macOS notifications when phases complete
 - **Quick controls** - Start, pause, reset, and skip from the menu bar
@@ -106,13 +106,18 @@ developer" warning and must right-click → **Open** to launch it.
 ## Project Structure
 
 ```
-PomodoroBarApp.swift   - App entry point, notification delegate
-TimerModel.swift       - Timer logic, state management, notifications
-TimerRingView.swift    - Animated circular progress ring
-MenuBarView.swift      - Main UI with controls and settings
+PomodoroBarApp.swift   - App entry point, NSApplicationDelegateAdaptor
+AppDelegate.swift      - NotificationDelegate, popover management
+TimerModel.swift       - Timer logic, state, notifications, UserDefaults persistence
+TimerRingView.swift    - Animated progress ring, cycle dots, scale animation
+MenuBarView.swift      - Main UI, controls, settings
+Updater.swift          - In-app auto-updater: GitHub releases check, download, SHA-256 verify
+update.sh              - Detached swap helper used by Updater
+set-version.sh         - Stamps version into AppVersion.swift + project.pbxproj
 install.sh             - curl-based CLI installer
 uninstall.sh           - CLI uninstaller
 Assets.xcassets/       - App icons, accent colors, phase colors
+docs/auto-update.md    - Research notes on auto-update design
 ```
 
 ## License
