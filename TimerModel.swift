@@ -86,6 +86,25 @@ final class TimerModel {
     phase == .longBreak ? longBreakInterval : completedPomodoros % longBreakInterval
   }
 
+  var nextPhase: Phase {
+    switch phase {
+    case .focus:
+      (completedPomodoros + 1) % longBreakInterval == 0 ? .longBreak : .shortBreak
+    case .shortBreak, .longBreak:
+      .focus
+    }
+  }
+
+  var menuBarIcon: String {
+    switch (phase, nextPhase) {
+    case (.focus, .shortBreak): "brain.head.profile"
+    case (.focus, .longBreak): "brain.head.profile"
+    case (.shortBreak, .focus): "cup.and.saucer"
+    case (.longBreak, .focus): "moon"
+    case (_, _): "brain.head.profile"
+    }
+  }
+
   private var timerTask: Task<Void, Never>?
   private var phaseEndDate: Date?
   private let defaults = UserDefaults.standard

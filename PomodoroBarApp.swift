@@ -53,13 +53,13 @@ struct MenuBarLabel: View {
     var body: some View {
         if model.isRunning || model.timeRemaining != model.totalTime {
             HStack(spacing: 4) {
-                Image(systemName: model.phase.icon)
+                Image(systemName: model.menuBarIcon)
                     .padding(.trailing, 4)
                 Text(model.menuBarTitle)
                     .monospacedDigit()
             }
         } else {
-            Image(systemName: "circle.dotted")
+            Image(systemName: model.menuBarIcon)
         }
     }
 }
