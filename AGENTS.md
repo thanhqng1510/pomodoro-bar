@@ -5,9 +5,10 @@ macOS menu bar Pomodoro timer app using SwiftUI and macOS 26 Liquid Glass.
 
 ## Project Structure
 ```
-PomodoroBarApp.swift   # App entry, notification delegate
+PomodoroBarApp.swift   # App entry, NSApplicationDelegateAdaptor
+AppDelegate.swift      # NotificationDelegate, popover management
 TimerModel.swift       # Business logic, state, notifications, UserDefaults persistence
-TimerRingView.swift    # Animated progress ring, cycle dots
+TimerRingView.swift    # Animated progress ring, cycle dots, scale animation on running state
 MenuBarView.swift      # Main UI, controls, settings
 Updater.swift          # In-app auto-updater: GitHub releases check, download, detach helper
 AppVersion.swift       # Version constant, stamped from the release tag by set-version.sh
@@ -54,7 +55,7 @@ xcodebuild -scheme PomodoroBar -configuration Debug build CODE_SIGNING_ALLOWED=N
 
 ## Notifications
 - Categories registered once in `TimerModel.init()`
-- Delegate in `PomodoroBarApp.swift`
+- Delegate in `AppDelegate.swift`
 - Check `authorizationStatus == .authorized` before adding
 - Code signing required for notifications to work
 

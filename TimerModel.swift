@@ -62,10 +62,6 @@ final class TimerModel {
     return min(1, max(0, Double(elapsed) / Double(totalSeconds)))
   }
 
-  var isPaused: Bool {
-    !isRunning && progress > 0
-  }
-
   var sessionLabel: String {
     switch phase {
     case .focus: "Focus \(pomodorosInCycle + 1)"
