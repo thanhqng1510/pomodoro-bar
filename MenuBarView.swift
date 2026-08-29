@@ -274,7 +274,7 @@ struct MenuBarView: View {
   private var durationsSection: some View {
     VStack(spacing: 4) {
       SettingNumberField(
-        label: "Focus", icon: "circle.inset.filled",
+        label: "Focus", icon: "brain.head.profile",
         value: $model.focusDuration, range: 1...120, unit: "min"
       )
       SettingNumberField(
