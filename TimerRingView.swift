@@ -15,7 +15,7 @@ struct TimerRingView: View {
   let phase: Phase
   let sessionLabel: String
   let timeText: String
-  var isPaused = false
+  var isRunning = false
   var onToggle: () -> Void = {}
   @State private var isHovering = false
 
@@ -40,24 +40,26 @@ struct TimerRingView: View {
           .contentTransition(.numericText())
           .animation(.easeInOut(duration: 0.25), value: timeText)
 
-        Text(isPaused ? "Paused" : sessionLabel)
+        Text(sessionLabel)
           .font(.system(size: 10, weight: .medium, design: .rounded))
           .foregroundStyle(.secondary)
           .textCase(.uppercase)
           .tracking(0.8)
           .multilineTextAlignment(.center)
       }
+      .scaleEffect(isRunning ? 1.0 : 0.80)
+      .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isRunning)
     }
     .frame(width: 150, height: 150)
     .contentShape(Circle())
     .onHover { isHovering = $0 }
     .onTapGesture { onToggle() }
     .animation(.spring(response: 0.3, dampingFraction: 0.5), value: isHovering)
-    .opacity(isPaused ? 0.6 : 1)
-    .animation(.easeInOut(duration: 0.2), value: isPaused)
+    .opacity(isRunning ? 1 : 0.6)
+    .animation(.easeInOut(duration: 0.2), value: isRunning)
     .accessibilityElement(children: .ignore)
     .accessibilityLabel("\(phase.rawValue) timer")
-    .accessibilityValue(isPaused ? "Paused at \(timeText)" : "\(timeText) remaining")
+    .accessibilityValue("\(timeText) remaining")
   }
 }
 

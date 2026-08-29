@@ -114,6 +114,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
       popover.close()
     } else if let button = statusItem.button {
       popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+      popover.contentViewController?.view.window?.makeKey()
     }
   }
 
