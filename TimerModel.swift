@@ -214,8 +214,11 @@ final class TimerModel {
   }
 
   private func sendNotification() {
-    guard notificationEnabled else { return }
     let center = UNUserNotificationCenter.current()
+    center.removeAllPendingNotificationRequests()
+    center.removeAllDeliveredNotifications()
+
+    guard notificationEnabled else { return }
 
     center.getNotificationSettings { [phase = self.phase] settings in
       guard settings.authorizationStatus == .authorized else { return }
