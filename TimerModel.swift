@@ -26,9 +26,7 @@ final class TimerModel {
   var isRunning = false
   var timeRemaining: TimeInterval = 0
   var totalTime: TimeInterval = 0
-  var completedPomodoros = 0 {
-    didSet { defaults.set(completedPomodoros, forKey: Keys.completedPomodoros) }
-  }
+  var pomodorosInCycle = 0
 
   // MARK: - Settings (persisted to UserDefaults)
   var updater = Updater()
@@ -78,20 +76,20 @@ final class TimerModel {
 
   var sessionLabel: String {
     switch phase {
-    case .focus: "Focus \(completedPomodoros + 1)"
+    case .focus: "Focus \(pomodorosInCycle + 1)"
     case .shortBreak: "Short Break"
     case .longBreak: "Long Break"
     }
   }
 
   var completedInCycle: Int {
-    phase == .longBreak ? longBreakInterval : completedPomodoros % longBreakInterval
+    phase == .longBreak ? longBreakInterval : pomodorosInCycle % longBreakInterval
   }
 
   var nextPhase: Phase {
     switch phase {
     case .focus:
-      (completedPomodoros + 1) % longBreakInterval == 0 ? .longBreak : .shortBreak
+      (pomodorosInCycle + 1) % longBreakInterval == 0 ? .longBreak : .shortBreak
     case .shortBreak, .longBreak:
       .focus
     }
@@ -117,7 +115,6 @@ final class TimerModel {
     static let longBreakDuration = "longBreakDuration"
     static let longBreakInterval = "longBreakInterval"
     static let notificationEnabled = "notificationEnabled"
-    static let completedPomodoros = "completedPomodoros"
   }
 
   // MARK: - Init
@@ -127,7 +124,6 @@ final class TimerModel {
     longBreakDuration = Self.stored(defaults.integer(forKey: Keys.longBreakDuration), default: 15, in: 1...60)
     longBreakInterval = Self.stored(defaults.integer(forKey: Keys.longBreakInterval), default: 4, in: 1...10)
     notificationEnabled = defaults.object(forKey: Keys.notificationEnabled) as? Bool ?? true
-    completedPomodoros = max(0, defaults.integer(forKey: Keys.completedPomodoros))
 
     registerNotificationCategories()
     updater.checkForUpdates(force: true)  // verify on every launch so an update is never hidden by the daily throttle
@@ -176,7 +172,7 @@ final class TimerModel {
 
   func reset() {
     pause()
-    completedPomodoros = 0
+    pomodorosInCycle = 0
     resetToPhase(.focus)
   }
 
@@ -207,8 +203,9 @@ final class TimerModel {
   private func advancePhase() {
     switch phase {
     case .focus:
-      completedPomodoros += 1
-      if completedPomodoros % longBreakInterval == 0 {
+      pomodorosInCycle += 1
+      if pomodorosInCycle >= longBreakInterval {
+        pomodorosInCycle = 0
         resetToPhase(.longBreak)
       } else {
         resetToPhase(.shortBreak)

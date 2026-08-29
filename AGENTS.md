@@ -59,7 +59,7 @@ xcodebuild -scheme PomodoroBar -configuration Debug build CODE_SIGNING_ALLOWED=N
 - Code signing required for notifications to work
 
 ## Settings Persistence
-- Durations, long-break interval, notification toggle, and completed pomodoros persist via `UserDefaults` (see `TimerModel.Keys`)
+- Durations, long-break interval, and notification toggle persist via `UserDefaults` (see `TimerModel.Keys`); the in-cycle pomodoro count is memory-only and resets each cycle and on relaunch
 - Deadline-based timer (`phaseEndDate`) — do not revert to tick-based countdown
 
 ## CI / Releases (`.github/workflows/release.yml`)
