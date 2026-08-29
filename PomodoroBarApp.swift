@@ -51,15 +51,11 @@ struct MenuBarLabel: View {
     var model: TimerModel
 
     var body: some View {
-        if model.isRunning || model.timeRemaining != model.totalTime {
-            HStack(spacing: 4) {
-                Image(systemName: model.phase.icon)
-                    .padding(.trailing, 4)
-                Text(model.menuBarTitle)
-                    .monospacedDigit()
-            }
-        } else {
-            Image(systemName: "circle.dotted")
+        HStack(spacing: 4) {
+            Image(systemName: model.menuBarIcon)
+                .padding(.trailing, 4)
+            Text(model.menuBarTitle)
+                .monospacedDigit()
         }
     }
 }
