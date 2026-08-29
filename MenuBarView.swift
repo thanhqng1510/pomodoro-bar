@@ -89,7 +89,8 @@ struct MenuBarView: View {
         phase: model.phase,
         sessionLabel: model.sessionLabel,
         timeText: model.menuBarTitle,
-        isPaused: model.isPaused
+        isPaused: model.isPaused,
+        onToggle: { model.toggle() }
       )
       CycleDotsView(
         completed: model.completedInCycle,

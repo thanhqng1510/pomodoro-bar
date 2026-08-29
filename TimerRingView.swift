@@ -16,20 +16,22 @@ struct TimerRingView: View {
   let sessionLabel: String
   let timeText: String
   var isPaused = false
+  var onToggle: () -> Void = {}
+  @State private var isHovering = false
 
   var body: some View {
     ZStack {
       Circle()
-        .stroke(.quaternary, lineWidth: 3)
+        .stroke(isHovering ? .tertiary : .quaternary, lineWidth: isHovering ? 5 : 3)
 
       Circle()
         .trim(from: 0, to: max(progress, 0.005))
         .stroke(
           phase.color.gradient,
-          style: StrokeStyle(lineWidth: 4, lineCap: .round)
+          style: StrokeStyle(lineWidth: isHovering ? 7 : 4, lineCap: .round)
         )
         .rotationEffect(.degrees(-90))
-        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: progress)
+        .animation(.spring(response: 0.35, dampingFraction: 0.55), value: progress)
 
       VStack(spacing: 4) {
         Text(timeText)
@@ -47,6 +49,10 @@ struct TimerRingView: View {
       }
     }
     .frame(width: 150, height: 150)
+    .contentShape(Circle())
+    .onHover { isHovering = $0 }
+    .onTapGesture { onToggle() }
+    .animation(.spring(response: 0.3, dampingFraction: 0.5), value: isHovering)
     .opacity(isPaused ? 0.6 : 1)
     .animation(.easeInOut(duration: 0.2), value: isPaused)
     .accessibilityElement(children: .ignore)

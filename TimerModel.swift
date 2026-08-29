@@ -67,7 +67,9 @@ final class TimerModel {
 
   var progress: Double {
     guard totalTime > 0 else { return 0 }
-    return min(1, max(0, 1.0 - (timeRemaining / totalTime)))
+    let totalSeconds = max(1, Int(totalTime))
+    let elapsed = min(totalSeconds, max(0, totalSeconds - Int(timeRemaining)))
+    return min(1, max(0, Double(elapsed) / Double(totalSeconds)))
   }
 
   var isPaused: Bool {
