@@ -18,6 +18,7 @@ struct MenuBarView: View {
     .frame(width: 260)
     .onAppear {
       Task { await checkNotificationPermission() }
+      model.updater.checkForUpdates()
     }
   }
 
@@ -39,16 +40,35 @@ struct MenuBarView: View {
         showSettings.toggle()
       }
     } label: {
-      Image(systemName: showSettings ? "chevron.left" : "slider.horizontal.3")
-        .font(.system(size: 14))
-        .frame(width: 32, height: 32)
-        .contentShape(Circle())
+      ZStack(alignment: .topTrailing) {
+        Image(systemName: showSettings ? "chevron.left" : "slider.horizontal.3")
+          .font(.system(size: 14))
+          .frame(width: 32, height: 32)
+
+        if !showSettings, model.updater.state == .available {
+          Circle()
+            .fill(Color.accentColor)
+            .frame(width: 7, height: 7)
+            .offset(x: -3, y: 3)
+        }
+      }
+      .contentShape(Circle())
     }
     .buttonStyle(.borderless)
     .glassEffect(.regular.interactive(), in: Circle())
     .glassEffectID("left", in: glassNamespace)
-    .accessibilityLabel(showSettings ? "Back to timer" : "Settings")
-    .help(showSettings ? "Back to timer" : "Settings")
+    .accessibilityLabel(headerButtonLabel)
+    .help(headerButtonLabel)
+  }
+
+  private var headerButtonLabel: String {
+    if showSettings {
+      return "Back to timer"
+    } else if model.updater.state == .available {
+      return "Settings (Update available)"
+    } else {
+      return "Settings"
+    }
   }
 
   @ViewBuilder
