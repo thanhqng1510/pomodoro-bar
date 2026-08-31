@@ -183,8 +183,9 @@ final class TimerModel {
   }
 
   private func completePhase() {
+    let completedPhase = phase
     pause()
-    Task { await sendNotification() }
+    Task { await sendNotification(for: completedPhase) }
     advancePhase()
   }
 
@@ -219,7 +220,7 @@ final class TimerModel {
     UNUserNotificationCenter.current().setNotificationCategories([category])
   }
 
-  private func sendNotification() async {
+  private func sendNotification(for completedPhase: Phase) async {
     let center = UNUserNotificationCenter.current()
     center.removeAllPendingNotificationRequests()
     center.removeAllDeliveredNotifications()
@@ -230,7 +231,7 @@ final class TimerModel {
     guard settings.authorizationStatus == .authorized else { return }
 
     let content = UNMutableNotificationContent()
-    switch phase {
+    switch completedPhase {
     case .focus:
       content.title = "Focus Complete!"
       content.body = "Great work. Time for a break."

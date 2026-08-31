@@ -72,9 +72,13 @@ final class Updater {
       guard let self else { return }
       do {
         let session = Foundation.URLSession.shared
-        let url = URL(string: Self.latestURL)!
+        guard let url = URL(string: Self.latestURL) else {
+          return self.fail("Invalid update URL.")
+        }
         let (data, _) = try await session.data(from: url)
-        let body = String(data: data, encoding: .utf8)!
+        guard let body = String(data: data, encoding: .utf8) else {
+          return self.fail("Could not read response from GitHub.")
+        }
         let remote = self.latestTag(in: body)
         guard let remote else { return self.fail("No published release was found on GitHub.") }
         self.rememberCheck()
@@ -170,9 +174,16 @@ final class Updater {
         let (zipBytes, zipResponse) = try await session.bytes(from: zipURL!)
         let total = Double(zipResponse.expectedContentLength)
         var zipData = Data()
+        if total > 0 {
+          zipData.reserveCapacity(Int(total))
+        }
+        var lastReportedCount = 0
         for try await byte in zipBytes {
           zipData.append(byte)
-          if total > 0 { self.progress = min(1, Double(zipData.count) / total) }
+          if total > 0, zipData.count - lastReportedCount >= 65536 {
+            lastReportedCount = zipData.count
+            self.progress = min(1, Double(zipData.count) / total)
+          }
         }
         self.progress = 1
         let (cksData, _) = try await session.data(from: cksURL!)
@@ -188,7 +199,7 @@ final class Updater {
         try "version=\(version)\n".write(to: manifest, atomically: false, encoding: .utf8)
         let helper = work.appending(component: "update.sh")
         if let scriptURL = Bundle.main.url(forResource: "update.sh", withExtension: nil) {
-          let script = try String(data: try Data(contentsOf: scriptURL), encoding: .utf8) ?? ""
+          let script = (try? String(data: Data(contentsOf: scriptURL), encoding: .utf8)) ?? ""
           try script.write(to: helper, atomically: false, encoding: .utf8)
         }
         // posix_spawn needs an executable file.
