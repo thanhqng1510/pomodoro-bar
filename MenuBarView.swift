@@ -40,23 +40,23 @@ struct MenuBarView: View {
         showSettings.toggle()
       }
     } label: {
-      ZStack {
-        Image(systemName: showSettings ? "chevron.left" : "slider.horizontal.3")
-          .font(.system(size: 14))
-          .frame(width: 32, height: 32)
-
-        if !showSettings, model.updater.state == .available {
-          Circle()
-            .fill(Color.accentColor)
-            .frame(width: 7, height: 7)
-            .offset(x: 11.3, y: -11.3)
-        }
-      }
-      .contentShape(Circle())
+      Image(systemName: showSettings ? "chevron.left" : "slider.horizontal.3")
+        .font(.system(size: 14))
+        .frame(width: 32, height: 32)
+        .contentShape(Circle())
     }
     .buttonStyle(.borderless)
     .glassEffect(.regular.interactive(), in: Circle())
     .glassEffectID("left", in: glassNamespace)
+    .overlay {
+      if !showSettings, model.updater.state == .available {
+        Circle()
+          .fill(Color.accentColor)
+          .frame(width: 7, height: 7)
+          .offset(x: 11.3, y: -11.3)
+          .allowsHitTesting(false)
+      }
+    }
     .accessibilityLabel(headerButtonLabel)
     .help(headerButtonLabel)
   }
