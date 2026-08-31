@@ -13,11 +13,21 @@ struct MenuBarView: View {
       GlassEffectContainer(spacing: 12) {
         header
       }
+      .overlay(alignment: .topLeading) {
+        if !showSettings, model.updater.state == .available {
+          Circle()
+            .fill(Color.accentColor)
+            .frame(width: 7, height: 7)
+            .offset(x: 39.8, y: 13.2)
+            .allowsHitTesting(false)
+        }
+      }
       contentView
     }
     .frame(width: 260)
     .onAppear {
       Task { await checkNotificationPermission() }
+      model.updater.checkForUpdates()
     }
   }
 
@@ -47,8 +57,18 @@ struct MenuBarView: View {
     .buttonStyle(.borderless)
     .glassEffect(.regular.interactive(), in: Circle())
     .glassEffectID("left", in: glassNamespace)
-    .accessibilityLabel(showSettings ? "Back to timer" : "Settings")
-    .help(showSettings ? "Back to timer" : "Settings")
+    .accessibilityLabel(headerButtonLabel)
+    .help(headerButtonLabel)
+  }
+
+  private var headerButtonLabel: String {
+    if showSettings {
+      return "Back to timer"
+    } else if model.updater.state == .available {
+      return "Settings (Update available)"
+    } else {
+      return "Settings"
+    }
   }
 
   @ViewBuilder
