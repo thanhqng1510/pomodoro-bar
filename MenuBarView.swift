@@ -40,7 +40,7 @@ struct MenuBarView: View {
         showSettings.toggle()
       }
     } label: {
-      ZStack(alignment: .topTrailing) {
+      ZStack {
         Image(systemName: showSettings ? "chevron.left" : "slider.horizontal.3")
           .font(.system(size: 14))
           .frame(width: 32, height: 32)
@@ -49,7 +49,7 @@ struct MenuBarView: View {
           Circle()
             .fill(Color.accentColor)
             .frame(width: 7, height: 7)
-            .offset(x: -3, y: 3)
+            .offset(x: 11.3, y: -11.3)
         }
       }
       .contentShape(Circle())
