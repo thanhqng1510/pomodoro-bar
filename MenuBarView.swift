@@ -35,30 +35,32 @@ struct MenuBarView: View {
 
   @ViewBuilder
   private var headerButton: some View {
-    Button {
-      withAnimation(.bouncy) {
-        showSettings.toggle()
+    ZStack {
+      Button {
+        withAnimation(.bouncy) {
+          showSettings.toggle()
+        }
+      } label: {
+        Image(systemName: showSettings ? "chevron.left" : "slider.horizontal.3")
+          .font(.system(size: 14))
+          .frame(width: 32, height: 32)
+          .contentShape(Circle())
       }
-    } label: {
-      Image(systemName: showSettings ? "chevron.left" : "slider.horizontal.3")
-        .font(.system(size: 14))
-        .frame(width: 32, height: 32)
-        .contentShape(Circle())
-    }
-    .buttonStyle(.borderless)
-    .glassEffect(.regular.interactive(), in: Circle())
-    .glassEffectID("left", in: glassNamespace)
-    .overlay {
+      .buttonStyle(.borderless)
+      .glassEffect(.regular.interactive(), in: Circle())
+      .glassEffectID("left", in: glassNamespace)
+      .accessibilityLabel(headerButtonLabel)
+      .help(headerButtonLabel)
+
       if !showSettings, model.updater.state == .available {
         Circle()
           .fill(Color.accentColor)
           .frame(width: 7, height: 7)
           .offset(x: 11.3, y: -11.3)
           .allowsHitTesting(false)
+          .zIndex(10)
       }
     }
-    .accessibilityLabel(headerButtonLabel)
-    .help(headerButtonLabel)
   }
 
   private var headerButtonLabel: String {
