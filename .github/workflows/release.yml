@@ -42,10 +42,11 @@ jobs:
             build/Build/Products/Release/PomodoroBar.app/Contents/Info.plist)
           [ "$built" = "$VERSION" ] || { echo "::error::app version $built != tag $VERSION"; exit 1; }
 
-      - name: Stage and zip app
+      - name: Stage, sign, and zip app
         run: |
           mkdir -p dist
           cp -R build/Build/Products/Release/PomodoroBar.app dist/
+          codesign --force --sign - --deep dist/PomodoroBar.app
           ditto -c -k --sequesterRsrc --keepParent \
             dist/PomodoroBar.app "dist/PomodoroBar-$VERSION.zip"
           shasum -a 256 "dist/PomodoroBar-$VERSION.zip" > dist/checksums.txt

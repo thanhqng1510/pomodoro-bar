@@ -29,6 +29,11 @@ struct MenuBarView: View {
       Task { await checkNotificationPermission() }
       model.updater.checkForUpdates()
     }
+    .onChange(of: showSettings) { _, isShowing in
+      if isShowing {
+        Task { await checkNotificationPermission() }
+      }
+    }
   }
 
   // MARK: - Header
@@ -130,6 +135,7 @@ struct MenuBarView: View {
       durationsSection
       toggleSection
       permissionButton
+      focusModeHint
     }
     .padding(.horizontal, 16)
     .padding(.top, 2)
@@ -364,6 +370,23 @@ struct MenuBarView: View {
       .accessibilityLabel(
         notificationStatus == .denied ? "Open notification settings" : "Enable notifications"
       )
+    }
+  }
+
+  @ViewBuilder
+  private var focusModeHint: some View {
+    if model.notificationEnabled, notificationStatus == .authorized {
+      HStack(alignment: .top, spacing: 6) {
+        Image(systemName: "moon.fill")
+          .font(.system(size: 9))
+          .foregroundStyle(.secondary)
+          .padding(.top, 2)
+        Text("To receive alerts during Focus (Do Not Disturb), add Pomodoro Bar in System Settings > Focus > Allowed Apps.")
+          .font(.system(size: 10))
+          .foregroundStyle(.secondary)
+          .fixedSize(horizontal: false, vertical: true)
+      }
+      .padding(.horizontal, 4)
     }
   }
 
