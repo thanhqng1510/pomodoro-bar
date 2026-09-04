@@ -56,8 +56,11 @@ xcodebuild -scheme PomodoroBar -configuration Debug build CODE_SIGNING_ALLOWED=N
 ## Notifications
 - Categories registered once in `TimerModel.init()`
 - Delegate in `AppDelegate.swift`
-- Check `authorizationStatus == .authorized` before adding
-- Code signing required for notifications to work
+- Permission requested on launch (`applicationDidFinishLaunching`) and lazily if `.notDetermined`
+- Check `authorizationStatus == .authorized || authorizationStatus == .provisional` before adding
+- `content.interruptionLevel = .timeSensitive` set on completion alerts
+- Completion sound plays via `NSSound` on phase end to ensure audible feedback regardless of banner delivery
+- Note: `com.apple.developer.usernotifications.time-sensitive` is a restricted Apple Developer entitlement; adding it to ad-hoc signatures triggers AMFI launch failure (POSIX error 163). To receive notifications during Focus modes, users can add Pomodoro Bar to System Settings > Focus > Allowed Apps.
 
 ## Settings Persistence
 - Durations, long-break interval, and notification toggle persist via `UserDefaults` (see `TimerModel.Keys`); the in-cycle pomodoro count is memory-only and resets each cycle and on relaunch

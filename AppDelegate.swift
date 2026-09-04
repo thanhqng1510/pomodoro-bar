@@ -9,7 +9,7 @@ class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
   func userNotificationCenter(
     _ center: UNUserNotificationCenter, willPresent notification: UNNotification
   ) async -> UNNotificationPresentationOptions {
-    return [.banner, .sound, .list]
+    return [.banner, .list]
   }
 
   func userNotificationCenter(
@@ -45,6 +45,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     setupStatusItem()
     setupPopover()
+
+    Task {
+      let center = UNUserNotificationCenter.current()
+      let settings = await center.notificationSettings()
+      if settings.authorizationStatus == .notDetermined && model.notificationEnabled {
+        _ = try? await center.requestAuthorization(options: [.alert, .sound, .badge])
+      }
+    }
   }
 
   // MARK: - Status Item

@@ -185,6 +185,9 @@ final class TimerModel {
   private func completePhase() {
     let completedPhase = phase
     pause()
+    if notificationEnabled {
+      NSSound(named: "Glass")?.play()
+    }
     Task { await sendNotification(for: completedPhase) }
     advancePhase()
   }
@@ -227,8 +230,17 @@ final class TimerModel {
 
     guard notificationEnabled else { return }
 
-    let settings = await center.notificationSettings()
-    guard settings.authorizationStatus == .authorized else { return }
+    var settings = await center.notificationSettings()
+    if settings.authorizationStatus == .notDetermined {
+      let granted = (try? await center.requestAuthorization(options: [.alert, .sound, .badge])) ?? false
+      if granted {
+        settings = await center.notificationSettings()
+      }
+    }
+
+    guard settings.authorizationStatus == .authorized || settings.authorizationStatus == .provisional else {
+      return
+    }
 
     let content = UNMutableNotificationContent()
     switch completedPhase {
@@ -242,9 +254,9 @@ final class TimerModel {
       content.title = "Long Break Over"
       content.body = "Let's get back to work!"
     }
-    content.sound = .default
     content.categoryIdentifier = "PHASE_COMPLETE"
     content.interruptionLevel = .timeSensitive
+    content.relevanceScore = 1.0
     let request = UNNotificationRequest(
       identifier: UUID().uuidString,
       content: content,
