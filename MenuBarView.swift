@@ -135,11 +135,11 @@ struct MenuBarView: View {
       durationsSection
       toggleSection
       permissionButton
-      focusModeHint
     }
     .padding(.horizontal, 16)
     .padding(.top, 2)
     .padding(.bottom, 14)
+    .animation(.spring(response: 0.35, dampingFraction: 0.8), value: model.notificationEnabled)
   }
 
   // MARK: - Update UI
@@ -323,17 +323,28 @@ struct MenuBarView: View {
   }
 
   private var toggleSection: some View {
-    HStack(spacing: 10) {
-      Image(systemName: "bell")
-        .font(.system(size: 10))
-        .foregroundStyle(.secondary)
-        .frame(width: 14)
+    VStack(alignment: .leading, spacing: 0) {
+      HStack(spacing: 10) {
+        Image(systemName: "bell")
+          .font(.system(size: 10))
+          .foregroundStyle(.secondary)
+          .frame(width: 14)
 
-      Text("Notifications")
-        .font(.system(size: 12))
-        .frame(maxWidth: .infinity, alignment: .leading)
+        Text("Notifications")
+          .font(.system(size: 12))
+          .frame(maxWidth: .infinity, alignment: .leading)
 
-      Toggle("Notifications", isOn: $model.notificationEnabled)
+        Toggle(
+          "Notifications",
+          isOn: Binding(
+            get: { model.notificationEnabled },
+            set: { newValue in
+              withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                model.notificationEnabled = newValue
+              }
+            }
+          )
+        )
         .labelsHidden()
         .toggleStyle(.switch)
         .controlSize(.small)
@@ -342,8 +353,27 @@ struct MenuBarView: View {
             Task { await requestNotificationPermission() }
           }
         }
+      }
+
+      if model.notificationEnabled, notificationStatus == .authorized {
+        HStack(alignment: .top, spacing: 6) {
+          Image(systemName: "moon.fill")
+            .font(.system(size: 9))
+            .foregroundStyle(.secondary)
+            .padding(.top, 2)
+          Text("For Focus (Do Not Disturb) alerts, add Pomodoro Bar in System Settings > Focus > Allowed Apps.")
+            .font(.system(size: 10))
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(.top, 8)
+        .transition(.asymmetric(
+          insertion: .opacity.combined(with: .offset(y: -4)),
+          removal: .opacity.combined(with: .offset(y: -4))
+        ))
+      }
     }
-    .padding(.vertical, 6)
+    .padding(.vertical, 8)
     .padding(.horizontal, 12)
     .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 16))
   }
@@ -370,23 +400,10 @@ struct MenuBarView: View {
       .accessibilityLabel(
         notificationStatus == .denied ? "Open notification settings" : "Enable notifications"
       )
-    }
-  }
-
-  @ViewBuilder
-  private var focusModeHint: some View {
-    if model.notificationEnabled, notificationStatus == .authorized {
-      HStack(alignment: .top, spacing: 6) {
-        Image(systemName: "moon.fill")
-          .font(.system(size: 9))
-          .foregroundStyle(.secondary)
-          .padding(.top, 2)
-        Text("To receive alerts during Focus (Do Not Disturb), add Pomodoro Bar in System Settings > Focus > Allowed Apps.")
-          .font(.system(size: 10))
-          .foregroundStyle(.secondary)
-          .fixedSize(horizontal: false, vertical: true)
-      }
-      .padding(.horizontal, 4)
+      .transition(.asymmetric(
+        insertion: .opacity.combined(with: .scale(scale: 0.95, anchor: .top)),
+        removal: .opacity.combined(with: .scale(scale: 0.95, anchor: .top))
+      ))
     }
   }
 
